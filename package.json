@@ -1,0 +1,68 @@
+{
+  "name": "@ikoabo/auth_srv",
+  "version": "1.0.0",
+  "description": "IKOABO Auth Microservice API",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "engines": {
+    "npm": ">=12.16.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "deploy": "tsc & npm publish",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/ikoabo/packages/auth-srv-ikoabo.git"
+  },
+  "keywords": [
+    "ikoabo",
+    "auth",
+    "microservice"
+  ],
+  "author": "Reinier Millo Sánchez <reinier.millo88@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/ikoabo/packages/auth-srv-ikoabo/issues",
+    "email": "reinier.millo88@gmail.com"
+  },
+  "homepage": "https://gitlab.com/ikoabo/packages/auth-srv-ikoabo#readme",
+  "publishConfig": {
+    "registry": "https://nxs.ikoabo.com/repository/npm-local/"
+  },
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "@ikoabo/core_srv": "^1.0.8",
+    "async": "^3.2.0",
+    "body-parser": "^1.19.0",
+    "events": "^3.1.0",
+    "express": "^4.17.1",
+    "moment": "^2.24.0",
+    "mongoose": "^5.9.7",
+    "morgan": "^1.10.0",
+    "path": "^0.12.7",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/errorhandler": "^1.5.0",
+    "@types/events": "^3.0.0",
+    "@types/express": "^4.17.6",
+    "@types/hapi__joi": "^16.0.12",
+    "@types/mocha": "^7.0.2",
+    "@types/mongoose": "^5.7.10",
+    "@types/request": "^2.48.4",
+    "chai": "^4.2.0",
+    "concurrently": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-javascript-obfuscator": "^1.1.6",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "gulp-uglify": "^3.0.2",
+    "mocha": "^7.1.1",
+    "typescript": "^3.8.3"
+  }
+}
