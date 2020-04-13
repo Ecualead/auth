@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-12T22:23:13-05:00
+ * @Last modified time: 2020-04-12T23:03:56-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -26,12 +26,15 @@ export class Authenticator {
   private static _instance: Authenticator;
   private _logger: Logger;
   private _authService: string;
+  private _token: string;
+  private _retries: number;
 
   /**
    * Private constructor to allow singleton instance
    */
   private constructor() {
     this._logger = new Logger('Authenticator');
+    this._retries = 0;
   }
 
   /**
@@ -45,6 +48,15 @@ export class Authenticator {
   }
 
   /**
+   * Set the auth service url
+   *
+   * @param authService  Auth service url to use
+   */
+  public setup(authService: string) {
+    this._authService = authService;
+  }
+
+  /**
    * Authenticate against the auth server using the given token and validate the scope
    *
    * @param token  Token to authenticate agains auth server
@@ -54,6 +66,7 @@ export class Authenticator {
     const self = this;
     return new Promise<IAuthInfo>((resolve, reject) => {
       if (!self._authService || self._authService.length <= 0) {
+        this._logger.error('Invalid auth service configuration');
         reject({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
         return;
       }
@@ -84,7 +97,7 @@ export class Authenticator {
 
         /* Check for success/error response */
         if (body['error']) {
-          reject({ boStatus: response.statusCode, boError: body['error'] });
+          reject({ boStatus: response.statusCode, boError: body['error'], boData: body['data'] });
           return;
         }
 
@@ -149,6 +162,7 @@ export class Authenticator {
     /* Validate the auth service configuration */
     if (!self._authService || self._authService.length <= 0) {
       return (_req: Request, _res: Response, next: NextFunction) => {
+        this._logger.error('Invalid auth service configuration');
         next({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
       };
     }
@@ -177,5 +191,79 @@ export class Authenticator {
           next();
         }).catch(next);
     };
+  }
+
+  /**
+   * Authenticate the service application
+   *
+   * @param id  Application id of the service
+   * @param secret  Application secret of the service
+   */
+  public authService(id: string, secret: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      /* Validate the auth service configuration */
+      if (!this._authService || this._authService.length <= 0 || !id || !secret) {
+        this._logger.error('Invalid auth service application authentication');
+        reject({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+      }
+
+      /* Prepare the authentication credentials */
+      let opts = {
+        auth: { username: id, password: secret },
+        form: {
+          grant_type: 'client_credentials',
+        },
+      };
+
+      this._retries++;
+      this._logger.debug('Authenticating service', { retry: this._retries });
+
+      /* Perform the authentication request against the IAM */
+      request.post(`${this._authService}/v1/oauth/token`, opts, (error: any, response: request.Response, body: any) => {
+        /* Reject on error */
+        if (error) {
+          this._logger.error('Invalid auth server response', error);
+
+          /* Check if the connection against the server fail */
+          if (error.code && error.code === 'ECONNREFUSED') {
+            /* Retry the request after 1 second */
+            setTimeout(() => {
+              this.authService(id, secret)
+                .then(() => {
+                  resolve();
+                }).catch(reject);
+            }, 1000);
+            return;
+          }
+
+          reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+          return;
+        }
+
+        /* Try to convert response body to JSON */
+        try {
+          body = JSON.parse(body);
+        } catch (err) {
+          reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+          return;
+        }
+
+        /* Check for success/error response */
+        if (body['error']) {
+          reject({ boStatus: response.statusCode, boError: body['error'], boData: body['data'] });
+          return;
+        }
+
+        this._token = Objects.get(body, 'data.accessToken', null);
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * Retrieve the auth token
+   */
+  public get token(): string {
+    return this._token;
   }
 }
