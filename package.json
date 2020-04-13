@@ -1,6 +1,6 @@
 {
   "name": "@ikoabo/auth_srv",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "IKOABO Auth Microservice API",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

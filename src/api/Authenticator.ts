@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-12T23:55:31-05:00
+ * @Last modified time: 2020-04-13T03:21:10-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -255,6 +255,7 @@ export class Authenticator {
           return;
         }
 
+        this._logger.debug('Service account authenticated');
         this._token = Objects.get(body, 'data.accessToken', null);
         resolve();
       });
