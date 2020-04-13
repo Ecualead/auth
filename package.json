@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "@ikoabo/core_srv": "^1.0.7",
+    "@ikoabo/core_srv": "^1.0.8",
     "async": "^3.2.0",
     "body-parser": "^1.19.0",
     "events": "^3.1.0",
