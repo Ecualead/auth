@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-12T23:03:56-05:00
+ * @Last modified time: 2020-04-12T23:55:31-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -202,9 +202,10 @@ export class Authenticator {
   public authService(id: string, secret: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       /* Validate the auth service configuration */
-      if (!this._authService || this._authService.length <= 0 || !id || !secret) {
+      if (!this._authService || this._authService.length <= 0 || !id || !secret || id.length === 0 || secret.length === 0) {
         this._logger.error('Invalid auth service application authentication');
         reject({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+        return;
       }
 
       /* Prepare the authentication credentials */
