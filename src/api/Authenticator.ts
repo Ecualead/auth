@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-13T03:21:10-05:00
+ * @Last modified time: 2020-04-25T05:05:19-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -63,7 +63,7 @@ export class Authenticator {
    * @param scope  Scope to validate
    */
   authenticate(token: string, scope?: string | string[]): Promise<IAuthInfo> {
-    const self = this;
+    const self = Authenticator.shared;
     return new Promise<IAuthInfo>((resolve, reject) => {
       if (!self._authService || self._authService.length <= 0) {
         this._logger.error('Invalid auth service configuration');
@@ -157,7 +157,7 @@ export class Authenticator {
    * @params scope  Scope to be validated for the given user or application
    */
   middleware(scope?: string | string[]): (req: Request, res: Response, next: NextFunction) => void {
-    const self = this;
+    const self = Authenticator.shared;
 
     /* Validate the auth service configuration */
     if (!self._authService || self._authService.length <= 0) {
