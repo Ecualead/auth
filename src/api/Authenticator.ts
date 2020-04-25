@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-25T05:05:19-05:00
+ * @Last modified time: 2020-04-25T05:22:18-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -84,7 +84,7 @@ export class Authenticator {
       /* Validate the token against the auth service */
       request.post(`${self._authService}/v1/oauth/authenticate`, opts, (error: any, response: request.Response, body: any) => {
         if (error) {
-          this._logger.error('Invalid auth server response', error);
+          this._logger.error('Invalid auth server response ', error);
           reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
           return;
         }
@@ -103,11 +103,11 @@ export class Authenticator {
 
         /* On success prepare the response information */
         let auth: IAuthInfo = {
-          uid: Objects.get(body, 'data.uid', null),
-          application: Objects.get(body, 'data.application', null),
-          project: Objects.get(body, 'data.project', null),
-          domain: Objects.get(body, 'data.domain', null),
-          scope: Objects.get(body, 'data.scope', []),
+          uid: Objects.get(body, 'uid', null),
+          application: Objects.get(body, 'application', null),
+          project: Objects.get(body, 'project', null),
+          domain: Objects.get(body, 'domain', null),
+          scope: Objects.get(body, 'scope', []),
         }
 
         /* Check for valid response data */
@@ -223,7 +223,7 @@ export class Authenticator {
       request.post(`${this._authService}/v1/oauth/token`, opts, (error: any, response: request.Response, body: any) => {
         /* Reject on error */
         if (error) {
-          this._logger.error('Invalid auth server response', error);
+          this._logger.error('Invalid auth server response ', error);
 
           /* Check if the connection against the server fail */
           if (error.code && error.code === 'ECONNREFUSED') {
@@ -256,7 +256,7 @@ export class Authenticator {
         }
 
         this._logger.debug('Service account authenticated');
-        this._token = Objects.get(body, 'data.accessToken', null);
+        this._token = Objects.get(body, 'accessToken', null);
         resolve();
       });
     });
