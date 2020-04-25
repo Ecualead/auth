@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-25T05:22:18-05:00
+ * @Last modified time: 2020-04-25T06:02:14-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -224,20 +224,13 @@ export class Authenticator {
         /* Reject on error */
         if (error) {
           this._logger.error('Invalid auth server response ', error);
-
-          /* Check if the connection against the server fail */
-          if (error.code && error.code === 'ECONNREFUSED') {
-            /* Retry the request after 1 second */
-            setTimeout(() => {
-              this.authService(id, secret)
-                .then(() => {
-                  resolve();
-                }).catch(reject);
-            }, 1000);
-            return;
-          }
-
-          reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+          /* Retry the request after 1 second */
+          setTimeout(() => {
+            this.authService(id, secret)
+              .then(() => {
+                resolve();
+              }).catch(reject);
+          }, 1000);
           return;
         }
 
@@ -245,7 +238,14 @@ export class Authenticator {
         try {
           body = JSON.parse(body);
         } catch (err) {
-          reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+          this._logger.error('Invalid auth server response ', err);
+          /* Retry the request after 1 second */
+          setTimeout(() => {
+            this.authService(id, secret)
+              .then(() => {
+                resolve();
+              }).catch(reject);
+          }, 1000);
           return;
         }
 
