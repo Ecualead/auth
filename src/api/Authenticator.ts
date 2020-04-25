@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-25T06:02:14-05:00
+ * @Last modified time: 2020-04-25T06:45:38-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -158,15 +158,6 @@ export class Authenticator {
    */
   middleware(scope?: string | string[]): (req: Request, res: Response, next: NextFunction) => void {
     const self = Authenticator.shared;
-
-    /* Validate the auth service configuration */
-    if (!self._authService || self._authService.length <= 0) {
-      return (_req: Request, _res: Response, next: NextFunction) => {
-        this._logger.error('Invalid auth service configuration');
-        next({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
-      };
-    }
-
     return (req: Request, res: Response, next: NextFunction) => {
       /* Get authorization header token */
       const header: string[] = req.headers.authorization ? req.headers.authorization.split(' ') : [];
