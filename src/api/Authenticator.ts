@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: Authenticator.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-25T06:45:38-05:00
+ * @Last modified time: 2020-05-11T02:17:57-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -179,6 +179,7 @@ export class Authenticator {
       self.authenticate(header[1], scope)
         .then((auth: IAuthInfo) => {
           res.locals['auth'] = auth;
+          (<any>req)['user'] = auth;
           next();
         }).catch(next);
     };
@@ -211,7 +212,7 @@ export class Authenticator {
       this._logger.debug('Authenticating service', { retry: this._retries });
 
       /* Perform the authentication request against the IAM */
-      request.post(`${this._authService}/v1/oauth/token`, opts, (error: any, response: request.Response, body: any) => {
+      request.post(`${this._authService}/v1/oauth/signin`, opts, (error: any, response: request.Response, body: any) => {
         /* Reject on error */
         if (error) {
           this._logger.error('Invalid auth server response ', error);
