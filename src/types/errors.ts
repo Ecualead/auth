@@ -5,7 +5,7 @@
  * @Project: IKOABO Auth Microservice API
  * @Filename: errors.ts
  * @Last modified by:   millo
- * @Last modified time: 2020-04-12T22:23:19-05:00
+ * @Last modified time: 2020-05-03T17:25:40-05:00
  * @Copyright: Copyright 2020 IKOA Business Opportunity
  */
 
@@ -34,4 +34,6 @@ export enum ERRORS {
   PROFILE_NOT_FOUND,
   RECOVER_NOT_ALLOWED,
   AUTHENTICATION_REQUIRED,
+  INVALID_CODE_ERROR,
+  INVALID_CODE_FULL,
 }
