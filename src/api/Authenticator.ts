@@ -15,7 +15,7 @@ import { Objects, HTTP_STATUS, Logger } from '@ikoabo/core_srv';
 import { ERRORS } from '../types/errors';
 
 export interface IAuthInfo {
-  uid: string;
+  user: string;
   application: string;
   project: string;
   domain: string;
@@ -103,7 +103,7 @@ export class Authenticator {
 
         /* On success prepare the response information */
         let auth: IAuthInfo = {
-          uid: Objects.get(body, 'uid', null),
+          user: Objects.get(body, 'user', null),
           application: Objects.get(body, 'application', null),
           project: Objects.get(body, 'project', null),
           domain: Objects.get(body, 'domain', null),
