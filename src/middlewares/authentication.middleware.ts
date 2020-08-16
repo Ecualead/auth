@@ -1,20 +1,19 @@
 /**
- * @Author: Reinier Millo Sánchez <millo>
- * @Date:   2020-04-12T21:28:26-05:00
- * @Email:  reinier.millo88@gmail.com
- * @Project: IKOABO Auth Microservice API
- * @Filename: Authenticator.ts
- * @Last modified by:   millo
- * @Last modified time: 2020-05-11T02:17:57-05:00
- * @Copyright: Copyright 2020 IKOA Business Opportunity
+ * Copyright (C) 2020 IKOA Business Opportunity
+ * All Rights Reserved
+ * Author: Reinier Millo Sánchez <millo@ikoabo.com>
+ *
+ * This file is part of the IKOA Business Opportunity Auth API.
+ * It can't be copied and/or distributed without the express
+ * permission of the author.
  */
-
 import request from 'request';
 import { Request, Response, NextFunction } from 'express';
-import { Objects, HTTP_STATUS, Logger } from '@ikoabo/core_srv';
-import { ERRORS } from '../types/errors';
+import { AUTH_ERRORS } from '../models/errors.enum';
+import { HTTP_STATUS, Objects } from "@ikoabo/core";
 
-export interface IAuthInfo {
+
+export interface IAuthentication {
   user: string;
   application: string;
   project: string;
@@ -22,9 +21,8 @@ export interface IAuthInfo {
   scope: string[];
 };
 
-export class Authenticator {
-  private static _instance: Authenticator;
-  private _logger: Logger;
+class Authentication {
+  private static _instance: Authentication;
   private _authService: string;
   private _token: string;
   private _retries: number;
@@ -33,18 +31,17 @@ export class Authenticator {
    * Private constructor to allow singleton instance
    */
   private constructor() {
-    this._logger = new Logger('Authenticator');
     this._retries = 0;
   }
 
   /**
-   * Retrieve singleton class instance
+   * Get singleton class instance
    */
-  public static get shared(): Authenticator {
-    if (!Authenticator._instance) {
-      Authenticator._instance = new Authenticator();
+  public static get shared(): Authentication {
+    if (!Authentication._instance) {
+      Authentication._instance = new Authentication();
     }
-    return Authenticator._instance;
+    return Authentication._instance;
   }
 
   /**
@@ -62,17 +59,15 @@ export class Authenticator {
    * @param token  Token to authenticate agains auth server
    * @param scope  Scope to validate
    */
-  authenticate(token: string, scope?: string | string[]): Promise<IAuthInfo> {
-    const self = Authenticator.shared;
-    return new Promise<IAuthInfo>((resolve, reject) => {
-      if (!self._authService || self._authService.length <= 0) {
-        this._logger.error('Invalid auth service configuration');
-        reject({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+  authenticate(token: string, scope?: string | string[]): Promise<IAuthentication> {
+    return new Promise<IAuthentication>((resolve, reject) => {
+      if (!this._authService || this._authService.length <= 0) {
+        reject({ boError: AUTH_ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE });
         return;
       }
 
       if (!token) {
-        reject({ boError: ERRORS.INVALID_TOKEN });
+        reject({ boError: AUTH_ERRORS.INVALID_TOKEN, boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED });
         return;
       }
 
@@ -82,16 +77,15 @@ export class Authenticator {
       };
 
       /* Validate the token against the auth service */
-      request.post(`${self._authService}/v1/oauth/authenticate`, opts, (error: any, response: request.Response, body: any) => {
+      request.post(`${this._authService}/v1/oauth/authenticate`, opts, (error: any, response: request.Response, body: any) => {
         if (error) {
-          this._logger.error('Invalid auth server response ', error);
-          reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+          reject({ boError: AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
           return;
         }
         try { /* Try to convert response body to JSON */
           body = JSON.parse(body);
         } catch {
-          reject({ boError: ERRORS.UNKNOWN_AUTH_SERVER_ERROR, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+          reject({ boError: AUTH_ERRORS.INVALID_SERVER_RESPONSE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
           return;
         }
 
@@ -102,7 +96,7 @@ export class Authenticator {
         }
 
         /* On success prepare the response information */
-        let auth: IAuthInfo = {
+        const auth: IAuthentication = {
           user: Objects.get(body, 'user', null),
           application: Objects.get(body, 'application', null),
           project: Objects.get(body, 'project', null),
@@ -112,7 +106,7 @@ export class Authenticator {
 
         /* Check for valid response data */
         if (!auth.domain || !auth.project || !auth.application) {
-          reject({ boError: ERRORS.AUTHENTICATION_REQUIRED, boStatus: HTTP_STATUS.HTTP_UNAUTHORIZED });
+          reject({ boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED, boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED });
           return;
         }
 
@@ -128,22 +122,22 @@ export class Authenticator {
    * @param auth  Authentication information
    * @param scope  Scope to be validated
    */
-  public validateScope(auth: IAuthInfo, scope?: string | string[]): Promise<IAuthInfo> {
-    return new Promise<IAuthInfo>((resolve, reject) => {
+  public validateScope(auth: IAuthentication, scope?: string | string[]): Promise<IAuthentication> {
+    return new Promise<IAuthentication>((resolve, reject) => {
       /* Validate required scopes */
       if (typeof scope === 'string') {
         if (auth.scope.indexOf(scope) < 0) {
-          reject({ boError: ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_FORBIDDEN });
+          reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
           return;
         }
       } else if (Array.isArray(scope)) {
         /* Scope is an array with multiple scopes. User must hold any of the given scope */
         if (scope.filter(value => auth.scope.indexOf(value) >= 0).length === 0) {
-          reject({ boError: ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_FORBIDDEN });
+          reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
           return;
         }
       } else if (scope) {
-        reject({ boError: ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_FORBIDDEN });
+        reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
         return;
       }
 
@@ -157,18 +151,17 @@ export class Authenticator {
    * @params scope  Scope to be validated for the given user or application
    */
   middleware(scope?: string | string[]): (req: Request, res: Response, next: NextFunction) => void {
-    const self = Authenticator.shared;
     return (req: Request, res: Response, next: NextFunction) => {
       /* Get authorization header token */
       const header: string[] = req.headers.authorization ? req.headers.authorization.split(' ') : [];
       if (!header || header.length !== 2) {
-        next({ boError: ERRORS.AUTHENTICATION_REQUIRED, boStatus: HTTP_STATUS.HTTP_UNAUTHORIZED });
+        next({ boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED, boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED });
         return;
       }
 
       /* Check if the request was authenticated previously */
       if (res.locals['auth']) {
-        self.validateScope(res.locals['auth'], scope)
+        AuthenticationCtrl.validateScope(res.locals['auth'], scope)
           .then(() => {
             next();
           }).catch(next);
@@ -176,8 +169,8 @@ export class Authenticator {
       }
 
       /* Authenticate the current request */
-      self.authenticate(header[1], scope)
-        .then((auth: IAuthInfo) => {
+      AuthenticationCtrl.authenticate(header[1], scope)
+        .then((auth: IAuthentication) => {
           res.locals['auth'] = auth;
           (<any>req)['user'] = auth;
           next();
@@ -195,8 +188,7 @@ export class Authenticator {
     return new Promise<void>((resolve, reject) => {
       /* Validate the auth service configuration */
       if (!this._authService || this._authService.length <= 0 || !id || !secret || id.length === 0 || secret.length === 0) {
-        this._logger.error('Invalid auth service application authentication');
-        reject({ boError: ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_INTERNAL_SERVER_ERROR });
+        reject({ boError: AUTH_ERRORS.INVALID_AUTH_SERVER, boStatus: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE });
         return;
       }
 
@@ -209,13 +201,10 @@ export class Authenticator {
       };
 
       this._retries++;
-      this._logger.debug('Authenticating service', { retry: this._retries });
-
       /* Perform the authentication request against the IAM */
       request.post(`${this._authService}/v1/oauth/signin`, opts, (error: any, response: request.Response, body: any) => {
         /* Reject on error */
         if (error) {
-          this._logger.error('Invalid auth server response ', error);
           /* Retry the request after 1 second */
           setTimeout(() => {
             this.authService(id, secret)
@@ -230,7 +219,6 @@ export class Authenticator {
         try {
           body = JSON.parse(body);
         } catch (err) {
-          this._logger.error('Invalid auth server response ', err);
           /* Retry the request after 1 second */
           setTimeout(() => {
             this.authService(id, secret)
@@ -246,8 +234,6 @@ export class Authenticator {
           reject({ boStatus: response.statusCode, boError: body['error'], boData: body['data'] });
           return;
         }
-
-        this._logger.debug('Service account authenticated');
         this._token = Objects.get(body, 'accessToken', null);
         resolve();
       });
@@ -261,3 +247,5 @@ export class Authenticator {
     return this._token;
   }
 }
+
+export const AuthenticationCtrl = Authentication.shared;
