@@ -1,1 +1,1 @@
-# IKOABO Core Microservice API
+# IKOABO Business Opportunity Auth API
