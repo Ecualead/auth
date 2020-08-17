@@ -1,17 +1,20 @@
 /**
- * @Author: Reinier Millo Sánchez <millo>
- * @Date:   2020-04-12T21:47:45-05:00
- * @Email:  reinier.millo88@gmail.com
- * @Project: IKOABO Auth Microservice API
- * @Filename: errors.ts
- * @Last modified by:   millo
- * @Last modified time: 2020-04-12T22:23:19-05:00
- * @Copyright: Copyright 2020 IKOA Business Opportunity
+ * Copyright (C) 2020 IKOA Business Opportunity
+ * All Rights Reserved
+ * Author: Reinier Millo Sánchez <millo@ikoabo.com>
+ *
+ * This file is part of the IKOA Business Opportunity Auth API.
+ * It can't be copied and/or distributed without the express
+ * permission of the author.
  */
 
-export enum ERRORS {
+/**
+ * Predefined auth errors
+ */
+export enum AUTH_ERRORS {
   INVALID_AUTH_SERVER = 1001,
   UNKNOWN_AUTH_SERVER_ERROR,
+  INVALID_SERVER_RESPONSE,
   INVALID_AUTHORIZATION_CODE,
   INVALID_TOKEN,
   INVALID_REFRESH_TOKEN,
@@ -34,4 +37,7 @@ export enum ERRORS {
   PROFILE_NOT_FOUND,
   RECOVER_NOT_ALLOWED,
   AUTHENTICATION_REQUIRED,
+  APPLICATION_RESTRICTED,
+  INVALID_CODE_ERROR,
+  INVALID_CODE_FULL
 }

@@ -7,9 +7,13 @@
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
+import "mocha";
+import chai from "chai";
+const expect = chai.expect;
 
-/* Export api middlewares */
-export { AuthenticationCtrl, IAuthentication } from "./middlewares/authentication.middleware";
-
-/* Export models */
-export { AUTH_ERRORS } from "./models/errors.enum";
+describe("Stub module unit test", () => {
+  it("Stub test", (done) => {
+    expect("hello").to.be.a("string").to.have.length(5);
+    done();
+  }).timeout(1000);
+});
