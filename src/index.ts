@@ -9,7 +9,7 @@
  */
 
 /* Export api middlewares */
-export { AuthenticationCtrl, IAuthentication } from './middlewares/authentication.middleware';
+export { AuthenticationCtrl, IAuthentication } from "./middlewares/authentication.middleware";
 
 /* Export models */
-export { AUTH_ERRORS } from './models/errors.enum';
+export { AUTH_ERRORS } from "./models/errors.enum";

@@ -8,9 +8,9 @@
  * permission of the author.
  */
 
- /**
-  * Predefined auth errors
-  */
+/**
+ * Predefined auth errors
+ */
 export enum AUTH_ERRORS {
   INVALID_AUTH_SERVER = 1001,
   UNKNOWN_AUTH_SERVER_ERROR,
@@ -39,5 +39,5 @@ export enum AUTH_ERRORS {
   AUTHENTICATION_REQUIRED,
   APPLICATION_RESTRICTED,
   INVALID_CODE_ERROR,
-  INVALID_CODE_FULL,
+  INVALID_CODE_FULL
 }
