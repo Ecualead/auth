@@ -47,16 +47,6 @@
         "includeExports": true
       }
     ],
-    "import/order": [
-      "error",
-      {
-        "newlines-between": "never",
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
-        }
-      }
-    ],
     "semi": [
       "error",
       "always"

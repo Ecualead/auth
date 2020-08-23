@@ -1,11 +1,8 @@
 /**
  * Copyright (C) 2020 IKOA Business Opportunity
- * All Rights Reserved
  * Author: Reinier Millo Sánchez <millo@ikoabo.com>
  *
  * This file is part of the IKOA Business Opportunity Auth API.
- * It can't be copied and/or distributed without the express
- * permission of the author.
  */
 import { HTTP_STATUS, Objects } from "@ikoabo/core";
 import { Request, Response, NextFunction } from "express";
@@ -17,7 +14,14 @@ export interface IAuthentication {
   application: string;
   project: string;
   domain: string;
+  module: string;
   scope: string[];
+}
+
+export enum SCOPE_VALIDATION {
+  AND_VALIADTION = 1,
+  OR_VALIDATION = 2,
+  NOT_VALIDATION = 3
 }
 
 class Authentication {
@@ -58,7 +62,11 @@ class Authentication {
    * @param token  Token to authenticate agains auth server
    * @param scope  Scope to validate
    */
-  authenticate(token: string, scope?: string | string[]): Promise<IAuthentication> {
+  authenticate(
+    token: string,
+    scope?: string | string[],
+    validation?: SCOPE_VALIDATION
+  ): Promise<IAuthentication> {
     return new Promise<IAuthentication>((resolve, reject) => {
       if (!this._authService || this._authService.length <= 0) {
         reject({
@@ -113,20 +121,12 @@ class Authentication {
             application: Objects.get(body, "application", null),
             project: Objects.get(body, "project", null),
             domain: Objects.get(body, "domain", null),
+            module: Objects.get(body, "module", null),
             scope: Objects.get(body, "scope", [])
           };
 
-          /* Check for valid response data */
-          if (!auth.domain || !auth.project || !auth.application) {
-            reject({
-              boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED,
-              boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
-            });
-            return;
-          }
-
           /* Validate the user scopes */
-          this.validateScope(auth, scope).then(resolve).catch(reject);
+          this.validateScope(auth, scope, validation).then(resolve).catch(reject);
         }
       );
     });
@@ -138,7 +138,11 @@ class Authentication {
    * @param auth  Authentication information
    * @param scope  Scope to be validated
    */
-  public validateScope(auth: IAuthentication, scope?: string | string[]): Promise<IAuthentication> {
+  public validateScope(
+    auth: IAuthentication,
+    scope?: string | string[],
+    validation?: SCOPE_VALIDATION
+  ): Promise<IAuthentication> {
     return new Promise<IAuthentication>((resolve, reject) => {
       /* Validate required scopes */
       if (typeof scope === "string") {
@@ -147,10 +151,38 @@ class Authentication {
           return;
         }
       } else if (Array.isArray(scope)) {
-        /* Scope is an array with multiple scopes. User must hold any of the given scope */
-        if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length === 0) {
-          reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
-          return;
+        switch (validation) {
+          case SCOPE_VALIDATION.NOT_VALIDATION:
+            /* User must not hold any of the scopes */
+            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length > 0) {
+              reject({
+                boError: AUTH_ERRORS.INVALID_SCOPE,
+                boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+              });
+              return;
+            }
+            break;
+
+          case SCOPE_VALIDATION.OR_VALIDATION:
+            /* User must hold any of the scopes */
+            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length === 0) {
+              reject({
+                boError: AUTH_ERRORS.INVALID_SCOPE,
+                boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+              });
+              return;
+            }
+            break;
+
+          default:
+            /* User must holds all the scopes */
+            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length === scope.length) {
+              reject({
+                boError: AUTH_ERRORS.INVALID_SCOPE,
+                boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+              });
+              return;
+            }
         }
       } else if (scope) {
         reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
@@ -166,7 +198,10 @@ class Authentication {
    *
    * @params scope  Scope to be validated for the given user or application
    */
-  middleware(scope?: string | string[]): (req: Request, res: Response, next: NextFunction) => void {
+  middleware(
+    scope?: string | string[],
+    validation?: SCOPE_VALIDATION
+  ): (req: Request, res: Response, next: NextFunction) => void {
     return (req: Request, res: Response, next: NextFunction) => {
       /* Get authorization header token */
       const header: string[] = req.headers.authorization
@@ -182,7 +217,7 @@ class Authentication {
 
       /* Check if the request was authenticated previously */
       if (res.locals["auth"]) {
-        AuthenticationCtrl.validateScope(res.locals["auth"], scope)
+        AuthenticationCtrl.validateScope(res.locals["auth"], scope, validation)
           .then(() => {
             next();
           })
@@ -191,7 +226,7 @@ class Authentication {
       }
 
       /* Authenticate the current request */
-      AuthenticationCtrl.authenticate(header[1], scope)
+      AuthenticationCtrl.authenticate(header[1], scope, validation)
         .then((auth: IAuthentication) => {
           const reqTmp: any = req;
           res.locals["auth"] = auth;
