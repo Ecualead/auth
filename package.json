@@ -9,7 +9,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "deploy": "tsc && npm publish --access public",
+    "deploy": "tsc && npm run publish-npm && npm run publish-nexus",
+    "publish-npm": "npm publish --registry='https://registry.npmjs.org/' --access public",
+    "publish-nexus": "npm publish --registry='https://nxs.ikoabo.com/repository/npm-local/'",
     "lint": "tsc --noEmit && eslint '*/**/*.ts' --fix",
     "test": "mocha --require ts-node/register tests/*.ts",
     "coverage": "nyc npm run test"
@@ -23,19 +25,23 @@
   },
   "keywords": [
     "ikoabo",
-    "auth",
-    "microservice"
+    "authentication",
+    "microservice",
+    "oauth2",
+    "facebook",
+    "google",
+    "identity management system",
+    "account manager",
+    "referral tree",
+    "user unique code"
   ],
   "author": "Reinier Millo Sánchez <millo@ikoabo.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://gitlab.com/ikoabo/packages/auth/issues",
     "email": "millo@ikoabo.com"
   },
   "homepage": "https://gitlab.com/ikoabo/packages/auth#readme",
-  "publishConfig": {
-    "registry": "https://nxs.ikoabo.com/repository/npm-local/"
-  },
   "dependencies": {
     "@ikoabo/core": "^1.0.3",
     "express": "^4.17.1",
@@ -56,14 +62,5 @@
     "mocha": "^7.2.0",
     "prettier": "^2.0.5",
     "typescript": "^3.9.7"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,ts}": [
-      "eslint --fix ",
-      "git add"
-    ]
   }
 }
