@@ -6,7 +6,7 @@
  */
 import { HTTP_STATUS, Objects } from "@ikoabo/core";
 import { Request, Response, NextFunction } from "express";
-import request from "request";
+import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 import { AUTH_ERRORS } from "../models/errors.enum";
 
 export interface IAuthentication {
@@ -52,8 +52,36 @@ class Authentication {
    *
    * @param authService  Auth service url to use
    */
-  public setup(authService: string) {
+  public setup(authService: string, useInterceptor?: boolean) {
     this._authService = authService;
+
+    if (!useInterceptor) {
+      return;
+    }
+
+    /**
+     * AXIOS interceptor to inject authentication into requests
+     */
+    axios.interceptors.request.use((request: AxiosRequestConfig) => {
+      /* Append content type header if its not present */
+      if (!request.headers["Content-Type"]) {
+        request.headers["Content-Type"] = "application/json";
+      }
+
+      /* Check if the request must bypass the Authorization header */
+      if (request.headers.noauth) {
+        delete request.headers.Authorization;
+        delete request.headers.noauth;
+        return request;
+      }
+
+      /* Check if authorization is not set and the token exist */
+      if (!request.headers["Authorization"] && this._token) {
+        /* Check if the user is authenticated to send Bearer token */
+        request.headers.Authorization = "Bearer " + this._token;
+      }
+      return request;
+    });
   }
 
   /**
@@ -81,54 +109,48 @@ class Authentication {
         return;
       }
 
-      /* Prepare the request options with the given token */
-      const opts = {
-        auth: { bearer: token }
-      };
-
       /* Validate the token against the auth service */
-      request.post(
-        `${this._authService}/v1/oauth/authenticate`,
-        opts,
-        (error: any, response: request.Response, body: any) => {
-          if (error) {
-            reject({
-              boError: AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR,
-              boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-            });
-            return;
+      axios
+        .post(
+          `${this._authService}/v1/oauth/authenticate`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-          try {
-            /* Try to convert response body to JSON */
-            body = JSON.parse(body);
-          } catch {
-            reject({
+        )
+        .then((response: AxiosResponse) => {
+          const data = Objects.get(response, "data");
+
+          if (!data) {
+            return reject({
               boError: AUTH_ERRORS.INVALID_SERVER_RESPONSE,
               boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
             });
-            return;
-          }
-
-          /* Check for success/error response */
-          if (body["error"]) {
-            reject({ boStatus: response.statusCode, boError: body["error"], boData: body["data"] });
-            return;
           }
 
           /* On success prepare the response information */
           const auth: IAuthentication = {
-            user: Objects.get(body, "user", null),
-            application: Objects.get(body, "application", null),
-            project: Objects.get(body, "project", null),
-            domain: Objects.get(body, "domain", null),
-            module: Objects.get(body, "module", null),
-            scope: Objects.get(body, "scope", [])
+            user: Objects.get(data, "user", null),
+            application: Objects.get(data, "application", null),
+            project: Objects.get(data, "project", null),
+            domain: Objects.get(data, "domain", null),
+            module: Objects.get(data, "module", null),
+            scope: Objects.get(data, "scope", [])
           };
 
           /* Validate the user scopes */
           this.validateScope(auth, scope, validation).then(resolve).catch(reject);
-        }
-      );
+        })
+        .catch((err: AxiosError) => {
+          /* Reject the request with the same error from server */
+          reject({
+            boError: Objects.get(err, "response.data.error", AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR),
+            boStatus: Objects.get(err, "response.status", HTTP_STATUS.HTTP_4XX_FORBIDDEN),
+            boData: Objects.get(err, "response.data.data")
+          });
+        });
     });
   }
 
@@ -176,7 +198,7 @@ class Authentication {
 
           default:
             /* User must holds all the scopes */
-            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length === scope.length) {
+            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length !== scope.length) {
               reject({
                 boError: AUTH_ERRORS.INVALID_SCOPE,
                 boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
@@ -217,7 +239,7 @@ class Authentication {
 
       /* Check if the request was authenticated previously */
       if (res.locals["auth"]) {
-        AuthenticationCtrl.validateScope(res.locals["auth"], scope, validation)
+        this.validateScope(res.locals["auth"], scope, validation)
           .then(() => {
             next();
           })
@@ -226,7 +248,7 @@ class Authentication {
       }
 
       /* Authenticate the current request */
-      AuthenticationCtrl.authenticate(header[1], scope, validation)
+      this.authenticate(header[1], scope, validation)
         .then((auth: IAuthentication) => {
           const reqTmp: any = req;
           res.locals["auth"] = auth;
@@ -261,57 +283,69 @@ class Authentication {
         return;
       }
 
-      /* Prepare the authentication credentials */
-      const opts = {
-        auth: { username: id, password: secret },
-        form: {
-          grant_type: "client_credentials"
-        }
-      };
+      /* Prepare the request body */
+      const body = new URLSearchParams();
+      body.append("grant_type", "client_credentials");
 
-      this._retries++;
       /* Perform the authentication request against the IAM */
-      request.post(
-        `${this._authService}/v1/oauth/signin`,
-        opts,
-        (error: any, response: request.Response, body: any) => {
-          /* Reject on error */
-          if (error) {
-            /* Retry the request after 1 second */
-            setTimeout(() => {
+      this._retries++;
+      axios
+        .post(`${this._authService}/v1/oauth/signin`, body, {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          auth: {
+            username: id,
+            password: secret
+          }
+        })
+        .then((response: AxiosResponse) => {
+          const data = Objects.get(response, "data");
+
+          if (!data) {
+            /* Retry the request after 5 second */
+            return setTimeout(() => {
               this.authService(id, secret)
                 .then(() => {
                   resolve();
                 })
                 .catch(reject);
-            }, 1000);
-            return;
+            }, 5000);
           }
 
-          /* Try to convert response body to JSON */
-          try {
-            body = JSON.parse(body);
-          } catch (err) {
-            /* Retry the request after 1 second */
-            setTimeout(() => {
-              this.authService(id, secret)
-                .then(() => {
-                  resolve();
-                })
-                .catch(reject);
-            }, 1000);
-            return;
-          }
-
-          /* Check for success/error response */
-          if (body["error"]) {
-            reject({ boStatus: response.statusCode, boError: body["error"], boData: body["data"] });
-            return;
-          }
-          this._token = Objects.get(body, "accessToken", null);
+          this._token = Objects.get(data, "accessToken");
           resolve();
-        }
-      );
+        })
+        .catch((err: AxiosError) => {
+          const errCode = Objects.get(
+            err,
+            "response.data.error",
+            AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR
+          );
+          const errStatus = Objects.get(err, "response.status", HTTP_STATUS.HTTP_5XX_BAD_GATEWAY);
+
+          /* Check if the authentication server seems offline */
+          if (
+            errStatus === HTTP_STATUS.HTTP_5XX_BAD_GATEWAY ||
+            errCode === AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR
+          ) {
+            /* Retry the request after 5 second */
+            return setTimeout(() => {
+              this.authService(id, secret)
+                .then(() => {
+                  resolve();
+                })
+                .catch(reject);
+            }, 5000);
+          }
+
+          /* Reject the request with the same error from server */
+          reject({
+            boError: errCode,
+            boStatus: errStatus,
+            boData: Objects.get(err, "response.data.data")
+          });
+        });
     });
   }
 

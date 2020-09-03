@@ -20,10 +20,12 @@ The authententication middleware must be initialized with the address of the Ide
 
 ```js
 import { AuthenticationCtrl } from "@ikoabo/auth";
-AuthenticationCtrl.setup("https://myserver.com");
+AuthenticationCtrl.setup("https://myserver.com", true);
 ```
 
 After the middleware is initialized we can use it to authenticate the API Backend or to validate a received request. Validations can only done over authorization with bearer tokens, in other cases always return not authorized.
+
+The second parameter can be used to inject the access token to each request performed with the axios if the `Authorization` header isn't set. If you don't want to set the authentication you must set the header `noauth` with any value. If you prefer not use the interceptor you can set it to false or omit.
 
 ### API Backend authentication
 
@@ -40,7 +42,7 @@ import { AuthenticationCtrl } from "@ikoabo/auth";
  */
 function requestCredentials(): Promise<void> {
   return new Promise<void>((resolve) => {
-    AuthenticationCtrl.setup("https://myserver.com");
+    AuthenticationCtrl.setup("https://myserver.com", true);
     AuthenticationCtrl.authService("miserviceid", "myservicesecret")
       .catch((err) => {
         console.error('Invalid authentication');
