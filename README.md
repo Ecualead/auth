@@ -125,3 +125,25 @@ This information can be accessed for the express response o request:
 req["user"];
 res.locals["auth"];
 ```
+
+If the `get` request can't sent the authorization token in the header request, the token can be taken from query parameters also, using the  following middlewares combination:
+
+```js
+import { Router, Request, Response, NextFunction } from "express";
+import { AuthenticationCtrl, SCOPE_VALIDATION } from "@ikoabo/auth";
+const router = Router();
+
+router.get(
+  "/hello",
+  AuthenticationCtrl.forceAuthToken("token"),
+  AuthenticationCtrl.middleware(["user", "admin"], SCOPE_VALIDATION.AND_VALIADTION),
+  (req: Request, res: Response, next: NextFunction) => {
+    res.send("Hello World");
+    res.end();
+  }
+);
+
+export default router;
+```
+
+In this case the middleware receive the access token into the `token` query parameter. By default middleware parameter can be omited and `token` is set by default, or you can change the field name.
