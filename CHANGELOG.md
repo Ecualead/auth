@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [1.0.17] - 2020-09-04
+- Add middleware to allow pass access token into query parameters
+
 ## [1.0.16] - 2020-09-03
 - Fix scope AND validation
 - Replace request dependencie by axios
