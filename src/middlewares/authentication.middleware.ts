@@ -350,6 +350,36 @@ class Authentication {
   }
 
   /**
+   * Force request to be authenticated. If the access token is not
+   * set in header, then try to get from query parameters
+   *
+   * @param req
+   * @param _res
+   * @param next
+   */
+  public forceAuthToken(field = "token"): any {
+    return (req: Request, _res: Response, next: NextFunction) => {
+      /* Check for authorization token */
+      let token = Objects.get(req, "headers.authorization");
+      if (!token) {
+        /* Get the authorization token from URL */
+        token = Objects.get(req, `query.${field}`, "");
+        if (!token) {
+          return next({
+            boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED,
+            boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
+          });
+        }
+
+        /* Force authorization token from URL */
+        req.headers.authorization = `Bearer ${token}`;
+      }
+
+      next();
+    };
+  }
+
+  /**
    * Retrieve the auth token
    */
   public get token(): string {
