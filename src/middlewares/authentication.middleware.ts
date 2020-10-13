@@ -11,6 +11,7 @@ import { AUTH_ERRORS } from "../models/errors.enum";
 
 export interface IAuthentication {
   user: string;
+  username: string;
   application: string;
   project: string;
   domain: string;
@@ -133,6 +134,7 @@ class Authentication {
           /* On success prepare the response information */
           const auth: IAuthentication = {
             user: Objects.get(data, "user", null),
+            username: Objects.get(data, "username", null),
             application: Objects.get(data, "application", null),
             project: Objects.get(data, "project", null),
             domain: Objects.get(data, "domain", null),
