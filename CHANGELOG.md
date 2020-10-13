@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [1.0.18] - 2020-10-13
+- Return username on authentication validation
+
 ## [1.0.17] - 2020-09-04
 - Add middleware to allow pass access token into query parameters
 
