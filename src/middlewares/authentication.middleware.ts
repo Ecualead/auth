@@ -228,15 +228,19 @@ class Authentication {
   ): (req: Request, res: Response, next: NextFunction) => void {
     return (req: Request, res: Response, next: NextFunction) => {
       /* Get authorization header token */
-      const header: string[] = req.headers.authorization
-        ? req.headers.authorization.split(" ")
-        : [];
+      let header: string[] = req.headers.authorization ? req.headers.authorization.split(" ") : [];
       if (!header || header.length !== 2) {
-        next({
-          boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED,
-          boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
-        });
-        return;
+        /* If the header is not set then try to get token from query parameters */
+        const token = Objects.get(req, "query.bt");
+        if (!token) {
+          return next({
+            boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED,
+            boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
+          });
+        }
+
+        /* Set the query token */
+        header = ["Bearer", token];
       }
 
       /* Check if the request was authenticated previously */
