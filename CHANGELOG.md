@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [1.0.19] - 2020-10-19
+- Adding query bearer token authentication if no header present
+
 ## [1.0.18] - 2020-10-13
 - Return username on authentication validation
 

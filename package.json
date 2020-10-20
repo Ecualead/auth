@@ -1,6 +1,6 @@
 {
   "name": "@ikoabo/auth",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "IKOA Business Opportunity Auth API",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -48,13 +48,13 @@
     "@ikoabo/core": "^1.0.6"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.13",
+    "@types/chai": "^4.2.14",
     "@types/mocha": "^7.0.2",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
     "@typescript-eslint/parser": "^3.10.1",
     "chai": "^4.2.0",
     "eslint": "^7.11.0",
-    "eslint-config-prettier": "^6.12.0",
+    "eslint-config-prettier": "^6.13.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-unused-imports": "^0.1.3",
