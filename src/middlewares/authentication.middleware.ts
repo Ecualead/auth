@@ -1,8 +1,12 @@
 /**
- * Copyright (C) 2020 IKOA Business Opportunity
+ * Copyright (C) 2020 - 2021 IKOA Business Opportunity
+ *
+ * All Rights Reserved
  * Author: Reinier Millo Sánchez <millo@ikoabo.com>
  *
- * This file is part of the IKOA Business Opportunity Auth API.
+ * This file is part of the IKOA Business Oportunity Auth Package
+ * It can't be copied and/or distributed without the express
+ * permission of the author.
  */
 import { HTTP_STATUS, Objects } from "@ikoabo/core";
 import { Request, Response, NextFunction } from "express";
@@ -15,7 +19,6 @@ export interface IAuthentication {
   application: string;
   project: string;
   domain: string;
-  module: string;
   scope: string[];
 }
 
@@ -29,14 +32,12 @@ class Authentication {
   private static _instance: Authentication;
   private _authService: string;
   private _token: string;
-  private _retries: number;
+  private _project: string;
 
   /**
    * Private constructor to allow singleton instance
    */
-  private constructor() {
-    this._retries = 0;
-  }
+  private constructor() {}
 
   /**
    * Get singleton class instance
@@ -53,8 +54,9 @@ class Authentication {
    *
    * @param authService  Auth service url to use
    */
-  public setup(authService: string, useInterceptor?: boolean) {
+  public setup(authService: string, project: string, useInterceptor?: boolean) {
     this._authService = authService;
+    this._project = project;
 
     if (!useInterceptor) {
       return;
@@ -106,7 +108,10 @@ class Authentication {
       }
 
       if (!token) {
-        reject({ boError: AUTH_ERRORS.INVALID_TOKEN, boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED });
+        reject({
+          boError: AUTH_ERRORS.INVALID_TOKEN,
+          boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
+        });
         return;
       }
 
@@ -138,7 +143,6 @@ class Authentication {
             application: Objects.get(data, "application", null),
             project: Objects.get(data, "project", null),
             domain: Objects.get(data, "domain", null),
-            module: Objects.get(data, "module", null),
             scope: Objects.get(data, "scope", [])
           };
 
@@ -148,7 +152,18 @@ class Authentication {
         .catch((err: AxiosError) => {
           /* Reject the request with the same error from server */
           reject({
-            boError: Objects.get(err, "response.data.error", AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR),
+            boError: {
+              value: Objects.get(
+                err,
+                "response.data.error",
+                AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.value
+              ),
+              str: Objects.get(
+                err,
+                "response.data.description",
+                AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.str
+              )
+            },
             boStatus: Objects.get(err, "response.status", HTTP_STATUS.HTTP_4XX_FORBIDDEN),
             boData: Objects.get(err, "response.data.data")
           });
@@ -171,7 +186,10 @@ class Authentication {
       /* Validate required scopes */
       if (typeof scope === "string") {
         if (auth.scope.indexOf(scope) < 0) {
-          reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
+          reject({
+            boError: AUTH_ERRORS.INVALID_SCOPE,
+            boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+          });
           return;
         }
       } else if (Array.isArray(scope)) {
@@ -209,7 +227,10 @@ class Authentication {
             }
         }
       } else if (scope) {
-        reject({ boError: AUTH_ERRORS.INVALID_SCOPE, boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN });
+        reject({
+          boError: AUTH_ERRORS.INVALID_SCOPE,
+          boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+        });
         return;
       }
 
@@ -277,6 +298,8 @@ class Authentication {
       if (
         !this._authService ||
         this._authService.length <= 0 ||
+        !this._project ||
+        this._project.length <= 0 ||
         !id ||
         !secret ||
         id.length === 0 ||
@@ -294,9 +317,8 @@ class Authentication {
       body.append("grant_type", "client_credentials");
 
       /* Perform the authentication request against the IAM */
-      this._retries++;
       axios
-        .post(`${this._authService}/v1/oauth/signin`, body, {
+        .post(`${this._authService}/v1/oauth/${this._project}/login`, body, {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
@@ -323,11 +345,18 @@ class Authentication {
           resolve();
         })
         .catch((err: AxiosError) => {
-          const errCode = Objects.get(
-            err,
-            "response.data.error",
-            AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR
-          );
+          const errCode = {
+            value: Objects.get(
+              err,
+              "response.data.error",
+              AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.value
+            ),
+            str: Objects.get(
+              err,
+              "response.data.description",
+              AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.str
+            )
+          };
           const errStatus = Objects.get(err, "response.status", HTTP_STATUS.HTTP_5XX_BAD_GATEWAY);
 
           /* Check if the authentication server seems offline */
