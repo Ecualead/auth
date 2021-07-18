@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.1.1] - 2021-07-18
+
+- Addings auth server actions controller
+- Refactor internal source code
+- Adding data types for auth handling
+
 ## [1.1.0] - 2021-07-17
 
 - Update errors definition
