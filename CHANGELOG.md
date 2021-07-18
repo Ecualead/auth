@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.1.3] - 2021-07-18
+
+- Fix credential utility class export
+
 ## [1.1.2] - 2021-07-18
 
 - Addings header authorization credential parser
