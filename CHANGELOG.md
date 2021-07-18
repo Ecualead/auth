@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [1.1.4] - 2021-07-18
+
+- Add confirm action
+- Add resend action
+- Add recover actions
+- Add validation action
+
 ## [1.1.3] - 2021-07-18
 
 - Fix credential utility class export
