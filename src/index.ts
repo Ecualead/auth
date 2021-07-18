@@ -9,12 +9,23 @@
  * permission of the author.
  */
 
+/* Export controllers */
+export { AuthActionsCtrl } from "./controllers/auth.actions.controller";
+
 /* Export api middlewares */
-export {
-  AuthenticationCtrl,
-  IAuthentication,
-  SCOPE_VALIDATION
-} from "./middlewares/authentication.middleware";
+export { AuthenticationCtrl } from "./middlewares/authentication.middleware";
+
+/* Export constants */
+export { AUTH_ERRORS } from "./constants/errors.enum";
+export { SCOPE_VALIDATION } from "./constants/scope.enum";
 
 /* Export models */
-export { AUTH_ERRORS } from "./models/errors.enum";
+export {
+  IAuthenticationResponse,
+  IRegisterData,
+  ILoginData,
+  IProfileUpdateData,
+  IIdResponse,
+  ILoginResponse,
+  IProfileResponse
+} from "./models/data.types";
