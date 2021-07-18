@@ -11,22 +11,9 @@
 import { HTTP_STATUS, Objects } from "@ikoabo/core";
 import { Request, Response, NextFunction } from "express";
 import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
-import { AUTH_ERRORS } from "../models/errors.enum";
-
-export interface IAuthentication {
-  user: string;
-  username: string;
-  application: string;
-  project: string;
-  domain: string;
-  scope: string[];
-}
-
-export enum SCOPE_VALIDATION {
-  AND_VALIADTION = 1,
-  OR_VALIDATION = 2,
-  NOT_VALIDATION = 3
-}
+import { AUTH_ERRORS } from "../constants/errors.enum";
+import { IAuthenticationResponse } from "../models/data.types";
+import { SCOPE_VALIDATION } from "../constants/scope.enum";
 
 class Authentication {
   private static _instance: Authentication;
@@ -97,8 +84,8 @@ class Authentication {
     token: string,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
-  ): Promise<IAuthentication> {
-    return new Promise<IAuthentication>((resolve, reject) => {
+  ): Promise<IAuthenticationResponse> {
+    return new Promise<IAuthenticationResponse>((resolve, reject) => {
       if (!this._authService || this._authService.length <= 0) {
         reject({
           boError: AUTH_ERRORS.INVALID_AUTH_SERVER,
@@ -137,7 +124,7 @@ class Authentication {
           }
 
           /* On success prepare the response information */
-          const auth: IAuthentication = {
+          const auth: IAuthenticationResponse = {
             user: Objects.get(data, "user", null),
             username: Objects.get(data, "username", null),
             application: Objects.get(data, "application", null),
@@ -178,11 +165,11 @@ class Authentication {
    * @param scope  Scope to be validated
    */
   public validateScope(
-    auth: IAuthentication,
+    auth: IAuthenticationResponse,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
-  ): Promise<IAuthentication> {
-    return new Promise<IAuthentication>((resolve, reject) => {
+  ): Promise<IAuthenticationResponse> {
+    return new Promise<IAuthenticationResponse>((resolve, reject) => {
       /* Validate required scopes */
       if (typeof scope === "string") {
         if (auth.scope.indexOf(scope) < 0) {
@@ -276,7 +263,7 @@ class Authentication {
 
       /* Authenticate the current request */
       this.authenticate(header[1], scope, validation)
-        .then((auth: IAuthentication) => {
+        .then((auth: IAuthenticationResponse) => {
           const reqTmp: any = req;
           res.locals["auth"] = auth;
           reqTmp["user"] = auth;
