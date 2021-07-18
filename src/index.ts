@@ -29,3 +29,6 @@ export {
   ILoginResponse,
   IProfileResponse
 } from "./models/data.types";
+
+/* Export utility classes */
+export * from "./utils/credential.util";
