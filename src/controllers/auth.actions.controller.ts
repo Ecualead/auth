@@ -12,12 +12,17 @@ import { Objects } from "@ikoabo/core";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { AUTH_ERRORS } from "../constants/errors.enum";
 import {
+  IConfirmData,
+  IEmailResponse,
   IIdResponse,
   ILoginData,
   ILoginResponse,
+  IPasswordData,
   IProfileResponse,
   IProfileUpdateData,
-  IRegisterData
+  IRecoverData,
+  IRegisterData,
+  IValidationResponse
 } from "../models/data.types";
 
 class AuthActions {
@@ -125,6 +130,168 @@ class AuthActions {
     });
   }
 
+  /**
+   * Call to resend confirmation of an user account
+   *
+   * @param credential
+   * @param payload
+   * @returns
+   */
+  public resend(credential: string, payload: ILoginData): Promise<IEmailResponse> {
+    return new Promise<IEmailResponse>((resolve, reject) => {
+      const body = new URLSearchParams();
+      body.append("grant_type", "password");
+      body.append("username", payload.username);
+      body.append("password", payload.password);
+
+      axios
+        .post(`${this._service}/v1/oauth/${this._project}/resend`, body, {
+          headers: {
+            Authorization: `Basic ${credential}`,
+            "Content-type": "application/x-www-form-urlencoded"
+          }
+        })
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
+
+  /**
+   * Call to confirm an user account
+   *
+   * @param credential
+   * @param payload
+   * @returns
+   */
+  public confirm(credential: string, payload: IConfirmData): Promise<IEmailResponse> {
+    return new Promise<IEmailResponse>((resolve, reject) => {
+      axios
+        .post(`${this._service}/v1/oauth/${this._project}/confirm`, payload, {
+          headers: {
+            Authorization: `Bearer ${credential}`
+          }
+        })
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
+
+  /**
+   * Call to change user account password
+   *
+   * @param credential
+   * @param payload
+   * @returns
+   */
+  public passwd(credential: string, payload: IPasswordData): Promise<IEmailResponse> {
+    return new Promise<IEmailResponse>((resolve, reject) => {
+      axios
+        .post(`${this._service}/v1/oauth/${this._project}/password`, payload, {
+          headers: {
+            Authorization: `Bearer ${credential}`
+          }
+        })
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
+
+  /**
+   * Call to request a recover mail for user account
+   *
+   * @param credential
+   * @param payload
+   * @returns
+   */
+  public recoverRequest(credential: string, payload: IEmailResponse): Promise<IEmailResponse> {
+    return new Promise<IEmailResponse>((resolve, reject) => {
+      axios
+        .post(`${this._service}/v1/oauth/${this._project}/recover/request`, payload, {
+          headers: {
+            Authorization: `Bearer ${credential}`
+          }
+        })
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
+
+  /**
+   * Call to validate a recover toke
+   *
+   * @param credential
+   * @param payload
+   * @returns
+   */
+  public recoverValidate(credential: string, payload: IConfirmData): Promise<IEmailResponse> {
+    return new Promise<IEmailResponse>((resolve, reject) => {
+      axios
+        .post(`${this._service}/v1/oauth/${this._project}/recover/validate`, payload, {
+          headers: {
+            Authorization: `Bearer ${credential}`
+          }
+        })
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
+
+  /**
+   * Call to store new password from recovered user account
+   *
+   * @param credential
+   * @param payload
+   * @returns
+   */
+  public recoverStore(credential: string, payload: IRecoverData): Promise<IEmailResponse> {
+    return new Promise<IEmailResponse>((resolve, reject) => {
+      axios
+        .post(`${this._service}/v1/oauth/${this._project}/recover/store`, payload, {
+          headers: {
+            Authorization: `Bearer ${credential}`
+          }
+        })
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
+
+  /**
+   * Call to validate access token
+   *
+   * @param credential
+   * @returns
+   */
+  public valdiate(credential: string): Promise<IValidationResponse> {
+    return new Promise<IValidationResponse>((resolve, reject) => {
+      axios
+        .post(
+          `${this._service}/v1/oauth/authenticate`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${credential}`
+            }
+          }
+        )
+        .then((response: AxiosResponse) => {
+          resolve(response.data);
+        })
+        .catch(this._handleError(reject));
+    });
+  }
   /**
    * Call to logout an user account
    *
