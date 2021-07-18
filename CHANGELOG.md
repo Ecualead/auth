@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.1.2] - 2021-07-18
+
+- Addings header authorization credential parser
+
 ## [1.1.1] - 2021-07-18
 
 - Addings auth server actions controller

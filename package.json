@@ -1,6 +1,6 @@
 {
   "name": "@ikoabo/auth",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "IKOA Business Opportunity Auth API",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
