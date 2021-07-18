@@ -72,3 +72,32 @@ export interface IProfileResponse {
   custom1?: string;
   custom2?: string;
 }
+
+export interface IConfirmData {
+  email: string;
+  token: string;
+}
+
+export interface IEmailResponse {
+  email: string;
+}
+
+export interface IPasswordData {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface IRecoverData {
+  email: string;
+  token: string;
+  password: string;
+}
+
+export interface IValidationResponse {
+  application: string;
+  project: string;
+  domain: string;
+  scope: string[];
+  user?: string;
+  username?: string;
+}
