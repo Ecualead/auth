@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## [2.0.0] - 2021-08-13
+## [2.0.1] - 2021-08-04
+
+- Fix source code merge with version 1.1.4
+- Fix changelog date entry for version 2.0.0
+
+## [2.0.0] - 2021-08-03
 
 - Update error handler schema
 - Update to @ikoabo/server version 2.0.0
