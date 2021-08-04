@@ -80,7 +80,7 @@ const router = Router();
 
 router.get(
   "/hello",
-  AuthenticationCtrl.middleware(["user", "admin"], SCOPE_VALIDATION.AND_VALIADTION),
+  AuthenticationCtrl.middleware(["user", "admin"], SCOPE_VALIDATION.AND),
   (req: Request, res: Response, next: NextFunction) => {
     res.send("Hello World");
     res.end();
@@ -100,9 +100,9 @@ In case of array of scopes, it can be validated using one of the following three
 
 ```js
 enum SCOPE_VALIDATION {
-  AND_VALIADTION = 1, // Must contain all scopes
-  OR_VALIDATION = 2, // Must contain at least one scope
-  NOT_VALIDATION = 3 // Must not contain any scope
+  AND = 1, // Must contain all scopes
+  OR = 2, // Must contain at least one scope
+  NOT = 3 // Must not contain any scope
 }
 ```
 
@@ -136,7 +136,7 @@ const router = Router();
 router.get(
   "/hello",
   AuthenticationCtrl.forceAuthToken("token"),
-  AuthenticationCtrl.middleware(["user", "admin"], SCOPE_VALIDATION.AND_VALIADTION),
+  AuthenticationCtrl.middleware(["user", "admin"], SCOPE_VALIDATION.AND),
   (req: Request, res: Response, next: NextFunction) => {
     res.send("Hello World");
     res.end();
