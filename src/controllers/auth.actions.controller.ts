@@ -8,7 +8,7 @@
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
-import { Objects } from "@ikoabo/core";
+import { Objects } from "@ikoabo/server";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { AUTH_ERRORS } from "../constants/errors.enum";
 import {
@@ -30,7 +30,7 @@ class AuthActions {
   private _service: string;
   private _project: string;
 
-  private constructor() {}
+  private constructor() { }
 
   /**
    * Get singleton class instance
@@ -274,7 +274,7 @@ class AuthActions {
    * @param credential
    * @returns
    */
-  public valdiate(credential: string): Promise<IValidationResponse> {
+  public validate(credential: string): Promise<IValidationResponse> {
     return new Promise<IValidationResponse>((resolve, reject) => {
       axios
         .post(
