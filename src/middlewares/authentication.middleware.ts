@@ -8,7 +8,7 @@
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
-import { HTTP_STATUS, Objects } from "@ikoabo/core";
+import { HTTP_STATUS, Objects } from "@ikoabo/server";
 import { Request, Response, NextFunction } from "express";
 import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 import { AUTH_ERRORS } from "../constants/errors.enum";
@@ -24,7 +24,7 @@ class Authentication {
   /**
    * Private constructor to allow singleton instance
    */
-  private constructor() {}
+  private constructor() { }
 
   /**
    * Get singleton class instance
@@ -87,19 +87,11 @@ class Authentication {
   ): Promise<IAuthenticationResponse> {
     return new Promise<IAuthenticationResponse>((resolve, reject) => {
       if (!this._authService || this._authService.length <= 0) {
-        reject({
-          boError: AUTH_ERRORS.INVALID_AUTH_SERVER,
-          boStatus: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
-        });
-        return;
+        return reject({ boError: AUTH_ERRORS.INVALID_AUTH_SERVER });
       }
 
       if (!token) {
-        reject({
-          boError: AUTH_ERRORS.INVALID_TOKEN,
-          boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
-        });
-        return;
+        return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
       }
 
       /* Validate the token against the auth service */
@@ -117,10 +109,7 @@ class Authentication {
           const data = Objects.get(response, "data");
 
           if (!data) {
-            return reject({
-              boError: AUTH_ERRORS.INVALID_SERVER_RESPONSE,
-              boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-            });
+            return reject({ boError: AUTH_ERRORS.INVALID_SERVER_RESPONSE });
           }
 
           /* On success prepare the response information */
@@ -173,52 +162,32 @@ class Authentication {
       /* Validate required scopes */
       if (typeof scope === "string") {
         if (auth.scope.indexOf(scope) < 0) {
-          reject({
-            boError: AUTH_ERRORS.INVALID_SCOPE,
-            boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-          });
-          return;
+          return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
         }
       } else if (Array.isArray(scope)) {
         switch (validation) {
-          case SCOPE_VALIDATION.NOT_VALIDATION:
+          case SCOPE_VALIDATION.NOT:
             /* User must not hold any of the scopes */
             if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length > 0) {
-              reject({
-                boError: AUTH_ERRORS.INVALID_SCOPE,
-                boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-              });
-              return;
+              return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
             }
             break;
 
-          case SCOPE_VALIDATION.OR_VALIDATION:
+          case SCOPE_VALIDATION.OR:
             /* User must hold any of the scopes */
             if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length === 0) {
-              reject({
-                boError: AUTH_ERRORS.INVALID_SCOPE,
-                boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-              });
-              return;
+              return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
             }
             break;
 
           default:
             /* User must holds all the scopes */
             if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length !== scope.length) {
-              reject({
-                boError: AUTH_ERRORS.INVALID_SCOPE,
-                boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-              });
-              return;
+              return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
             }
         }
       } else if (scope) {
-        reject({
-          boError: AUTH_ERRORS.INVALID_SCOPE,
-          boStatus: HTTP_STATUS.HTTP_4XX_FORBIDDEN
-        });
-        return;
+        return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
       }
 
       resolve(auth);
@@ -241,10 +210,7 @@ class Authentication {
         /* If the header is not set then try to get token from query parameters */
         const token = Objects.get(req, "query.bt");
         if (!token) {
-          return next({
-            boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED,
-            boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
-          });
+          return next({ boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED });
         }
 
         /* Set the query token */
@@ -292,11 +258,7 @@ class Authentication {
         id.length === 0 ||
         secret.length === 0
       ) {
-        reject({
-          boError: AUTH_ERRORS.INVALID_AUTH_SERVER,
-          boStatus: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
-        });
-        return;
+        return reject({ boError: AUTH_ERRORS.INVALID_AUTH_SERVER });
       }
 
       /* Prepare the request body */
@@ -349,7 +311,7 @@ class Authentication {
           /* Check if the authentication server seems offline */
           if (
             errStatus === HTTP_STATUS.HTTP_5XX_BAD_GATEWAY ||
-            errCode === AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR
+            errCode.value === AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.value
           ) {
             /* Retry the request after 5 second */
             return setTimeout(() => {
@@ -387,10 +349,7 @@ class Authentication {
         /* Get the authorization token from URL */
         token = Objects.get(req, `query.${field}`, "");
         if (!token) {
-          return next({
-            boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED,
-            boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
-          });
+          return next({ boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED });
         }
 
         /* Force authorization token from URL */
