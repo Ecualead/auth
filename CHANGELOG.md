@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.0.0] - 2021-08-13
+
+- Update error handler schema
+- Update to @ikoabo/server version 2.0.0
+
 ## [1.1.4] - 2021-07-18
 
 - Add confirm action

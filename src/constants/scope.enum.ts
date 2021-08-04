@@ -9,7 +9,7 @@
  * permission of the author.
  */
 export enum SCOPE_VALIDATION {
-  AND_VALIADTION = 1,
-  OR_VALIDATION = 2,
-  NOT_VALIDATION = 3
+  AND = 1,
+  OR = 2,
+  NOT = 3
 }

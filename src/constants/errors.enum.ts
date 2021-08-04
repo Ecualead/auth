@@ -8,6 +8,7 @@
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
+import { HTTP_STATUS } from "@ikoabo/server";
 
 /**
  * Predefined auth errors
@@ -15,134 +16,167 @@
 export const AUTH_ERRORS = {
   INVALID_AUTH_SERVER: {
     value: 1001,
-    str: "invalid-auth-server"
+    str: "invalid-auth-server",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
   },
   UNKNOWN_AUTH_SERVER_ERROR: {
     value: 1002,
-    str: "unknown-auth-server-error"
+    str: "unknown-auth-server-error",
+    status: HTTP_STATUS.HTTP_5XX_INTERNAL_SERVER_ERROR
   },
   INVALID_SERVER_RESPONSE: {
     value: 1003,
-    str: "invalid-server-response"
+    str: "invalid-server-response",
+    status: HTTP_STATUS.HTTP_5XX_INTERNAL_SERVER_ERROR
   },
   INVALID_AUTHORIZATION_CODE: {
     value: 1004,
-    str: "invalid-authorization-code"
+    str: "invalid-authorization-code",
+    status: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
   },
   INVALID_TOKEN: {
     value: 1005,
-    str: "invalid-token"
+    str: "invalid-token",
+    status: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
   },
   INVALID_REFRESH_TOKEN: {
     value: 1006,
-    str: "invalid-refresh-token"
+    str: "invalid-refresh-token",
+    status: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
   },
   INVALID_SCOPE: {
     value: 1007,
-    str: "invalid-scope"
+    str: "invalid-scope",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   INVALID_DOMAIN: {
     value: 1008,
-    str: "invalid-domain"
+    str: "invalid-domain",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   INVALID_PROJECT: {
     value: 1009,
-    str: "invalid-project"
+    str: "invalid-project",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   INVALID_APPLICATION: {
     value: 1010,
-    str: "invalid-application"
+    str: "invalid-application",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   TOKEN_EXPIRED: {
     value: 1011,
-    str: "token-expired"
+    str: "token-expired",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   MAX_ATTEMPTS: {
     value: 1012,
-    str: "max-attempts"
+    str: "max-attempts",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   NOT_ALLOWED_SIGNIN: {
     value: 1013,
-    str: "not-allowed-signin"
+    str: "not-allowed-signin",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   ACCOUNT_DISABLED: {
     value: 1014,
-    str: "account-disabled"
+    str: "account-disabled",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   ACCOUNT_CANCELLED: {
     value: 1015,
-    str: "account-cancelled"
+    str: "account-cancelled",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   ACCOUNT_BLOCKED: {
     value: 1016,
-    str: "account-blocked"
+    str: "account-blocked",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   ACCOUNT_NOT_REGISTERED: {
     value: 1017,
-    str: "account-not-registered"
+    str: "account-not-registered",
+    status: HTTP_STATUS.HTTP_4XX_NOT_FOUND
   },
   ACCOUNT_ALREADY_CONFIRMED: {
     value: 1018,
-    str: "account-already-confirmed"
+    str: "account-already-confirmed",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
   },
   EMAIL_NOT_CONFIRMED: {
     value: 1019,
-    str: "email-not-confirmed"
+    str: "email-not-confirmed",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
   },
   INVALID_CREDENTIALS: {
     value: 1020,
-    str: "invalid-credentials"
+    str: "invalid-credentials",
+    status: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
   },
   EMAIL_IN_USE: {
     value: 1021,
-    str: "email-in-use"
+    str: "email-in-use",
+    status: HTTP_STATUS.HTTP_4XX_CONFLICT
   },
   USER_DUPLICATED: {
     value: 1022,
-    str: "user-duplcated"
+    str: "user-duplicated",
+    status: HTTP_STATUS.HTTP_4XX_CONFLICT
   },
   PROFILE_NOT_FOUND: {
     value: 1023,
-    str: "profile-not-found"
+    str: "profile-not-found",
+    status: HTTP_STATUS.HTTP_4XX_NOT_FOUND
   },
   RECOVER_NOT_ALLOWED: {
     value: 1024,
-    str: "recover-not-allowed"
+    str: "recover-not-allowed",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   AUTHENTICATION_REQUIRED: {
     value: 1025,
-    str: "authentication-required"
+    str: "authentication-required",
+    status: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED
   },
   APPLICATION_RESTRICTED: {
     value: 1026,
-    str: "application-restricted"
+    str: "application-restricted",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
   INVALID_CODE_ERROR: {
     value: 1027,
-    str: "invalid-code-error"
+    str: "invalid-code-error",
+    status: HTTP_STATUS.HTTP_4XX_BAD_REQUEST
   },
   INVALID_CODE_FULL: {
     value: 1028,
-    str: "invalid-code-full"
+    str: "invalid-code-full",
+    status: HTTP_STATUS.HTTP_4XX_BAD_REQUEST
   },
   INVALID_SOCIAL_REQUEST: {
     value: 1029,
-    str: "invalid-social-request"
+    str: "invalid-social-request",
+    status: HTTP_STATUS.HTTP_4XX_BAD_REQUEST
   },
   USER_ACCOUNT_MISMATCH: {
     value: 1030,
-    str: "user-account-mismatch"
+    str: "user-account-mismatch",
+    status: HTTP_STATUS.HTTP_4XX_CONFLICT
   },
   USER_SOCIAL_MISMATCH: {
     value: 1031,
-    str: "user-social-mismatch"
+    str: "user-social-mismatch",
+    status: HTTP_STATUS.HTTP_4XX_CONFLICT
   },
   ACCOUNT_PROFILE_NOT_FOUND: {
     value: 1032,
-    str: "account-profile-not-found"
+    str: "account-profile-not-found",
+    status: HTTP_STATUS.HTTP_4XX_NOT_FOUND
   },
   CANT_REGISTER_ANOTHER_SOCIAL: {
     value: 1033,
-    str: "cant-register-another-social"
+    str: "cant-register-another-social",
+    status: HTTP_STATUS.HTTP_4XX_BAD_REQUEST
   }
 };

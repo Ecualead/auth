@@ -8,8 +8,6 @@
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
-
-import { HTTP_STATUS } from "@ikoabo/core";
 import { AUTH_ERRORS } from "../constants/errors.enum";
 
 export class Credential {
@@ -24,10 +22,7 @@ export class Credential {
     return new Promise<string>((resolve, reject) => {
       const base: string[] = authorization.split(" ");
       if (base.length !== 2 && base[0].toUpperCase() !== type) {
-        return reject({
-          boStatus: HTTP_STATUS.HTTP_4XX_UNAUTHORIZED,
-          boError: AUTH_ERRORS.INVALID_CREDENTIALS
-        });
+        return reject({ boError: AUTH_ERRORS.INVALID_CREDENTIALS });
       }
 
       resolve(base[1]);
