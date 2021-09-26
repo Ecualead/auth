@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.0.2] - 2021-09-26
+
+- Update package dependencies
+
 ## [2.0.1] - 2021-08-04
 
 - Fix source code merge with version 1.1.4
