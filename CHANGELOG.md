@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.0.3] - 2021-10-13
+
+- Fix error responses: Add `data` field return to error
+
 ## [2.0.2] - 2021-09-26
 
 - Update package dependencies
