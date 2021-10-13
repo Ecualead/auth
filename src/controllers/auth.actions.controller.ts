@@ -30,7 +30,7 @@ class AuthActions {
   private _service: string;
   private _project: string;
 
-  private constructor() { }
+  private constructor() {}
 
   /**
    * Get singleton class instance
@@ -75,7 +75,8 @@ class AuthActions {
             "response.data.description",
             AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.str
           )
-        }
+        },
+        boData: Objects.get(err, "response.data.data")
       });
     };
   }
@@ -96,7 +97,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -124,7 +125,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -152,7 +153,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -174,7 +175,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -196,7 +197,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -218,7 +219,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -240,7 +241,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -262,7 +263,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -287,7 +288,7 @@ class AuthActions {
           }
         )
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -332,7 +333,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
@@ -354,7 +355,7 @@ class AuthActions {
           }
         })
         .then((response: AxiosResponse) => {
-          resolve(response.data);
+          resolve(response.data as any);
         })
         .catch(this._handleError(reject));
     });
