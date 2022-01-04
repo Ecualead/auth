@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.1.0] - 2022-01-03
+
+- Update package dependencies
+- Allow to validate JWT
+
 ## [2.0.3] - 2021-10-13
 
 - Fix error responses: Add `data` field return to error
