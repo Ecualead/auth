@@ -1,30 +1,33 @@
 /**
- * Copyright (C) 2020 - 2021 IKOA Business Opportunity
+ * Copyright (C) 2020 - 2022 ECUALEAD
  *
  * All Rights Reserved
- * Author: Reinier Millo Sánchez <millo@ikoabo.com>
+ * Author: Reinier Millo Sánchez <rmillo@ecualead.com>
  *
- * This file is part of the IKOA Business Oportunity Auth Package
+ * This file is part of the Developer Auth Package
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
-import { HTTP_STATUS, Objects } from "@ikoabo/server";
+import { HTTP_STATUS, Objects } from "@ecualead/server";
 import { Request, Response, NextFunction } from "express";
 import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 import { AUTH_ERRORS } from "../constants/errors.enum";
-import { IAuthenticationResponse } from "../models/data.types";
+import { IAuthPayload } from "../models/data.types";
 import { SCOPE_VALIDATION } from "../constants/scope.enum";
+import jwt from "jsonwebtoken";
 
 class Authentication {
   private static _instance: Authentication;
   private _authService: string;
   private _token: string;
   private _project: string;
+  private _audience: string;
+  private _validationKey: string;
 
   /**
    * Private constructor to allow singleton instance
    */
-  private constructor() { }
+  private constructor() {}
 
   /**
    * Get singleton class instance
@@ -41,9 +44,17 @@ class Authentication {
    *
    * @param authService  Auth service url to use
    */
-  public setup(authService: string, project: string, useInterceptor?: boolean) {
+  public setup(
+    authService: string,
+    project: string,
+    audience: string,
+    validationKey: string,
+    useInterceptor?: boolean
+  ) {
     this._authService = authService;
     this._project = project;
+    this._audience = audience;
+    this._validationKey = validationKey;
 
     if (!useInterceptor) {
       return;
@@ -75,6 +86,45 @@ class Authentication {
   }
 
   /**
+   * Validate the user access token
+   */
+  validateJWT(token: string): Promise<IAuthPayload> {
+    return new Promise<IAuthPayload>((resolve, reject) => {
+      if (!this._validationKey || !this._project || !this._audience) {
+        return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
+      }
+
+      try {
+        /* Validate the JWT token with the public key */
+        const verifyOptions: jwt.VerifyOptions = {
+          algorithms: ["RS256"]
+        };
+        const decoded: any = jwt.verify(token, this._validationKey, verifyOptions);
+
+        /* Check if the decoded token is valid */
+        if (
+          decoded["project"] !== this._project ||
+          decoded["iss"] !== this._project ||
+          decoded["aud"] !== this._audience ||
+          (decoded["ut"] === 1 && decoded["sub"] !== decoded["email"]) ||
+          (decoded["ut"] === 2 && decoded["sub"] !== decoded["app"])
+        ) {
+          return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
+        }
+
+        /* Check if the token is expired */
+        if (decoded["exp"] < Date.now() / 1000) {
+          return reject({ boError: AUTH_ERRORS.EXPIRED_TOKEN });
+        }
+
+        resolve(decoded as IAuthPayload);
+      } catch (err) {
+        reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
+      }
+    });
+  }
+
+  /**
    * Authenticate against the auth server using the given token and validate the scope
    *
    * @param token  Token to authenticate agains auth server
@@ -82,10 +132,11 @@ class Authentication {
    */
   authenticate(
     token: string,
+    userType?: number,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
-  ): Promise<IAuthenticationResponse> {
-    return new Promise<IAuthenticationResponse>((resolve, reject) => {
+  ): Promise<IAuthPayload> {
+    return new Promise<IAuthPayload>((resolve, reject) => {
       if (!this._authService || this._authService.length <= 0) {
         return reject({ boError: AUTH_ERRORS.INVALID_AUTH_SERVER });
       }
@@ -94,56 +145,65 @@ class Authentication {
         return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
       }
 
-      /* Validate the token against the auth service */
-      axios
-        .post(
-          `${this._authService}/v1/oauth/authenticate`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        )
-        .then((response: AxiosResponse) => {
-          const data = Objects.get(response, "data");
-
-          if (!data) {
-            return reject({ boError: AUTH_ERRORS.INVALID_SERVER_RESPONSE });
+      this.validateJWT(token)
+        .then((user: IAuthPayload) => {
+          /* Check if the user type is valid */
+          if (userType && user.type !== userType) {
+            return reject({ boError: AUTH_ERRORS.INVALID_USER_TYPE });
           }
 
-          /* On success prepare the response information */
-          const auth: IAuthenticationResponse = {
-            user: Objects.get(data, "user", null),
-            username: Objects.get(data, "username", null),
-            application: Objects.get(data, "application", null),
-            project: Objects.get(data, "project", null),
-            domain: Objects.get(data, "domain", null),
-            scope: Objects.get(data, "scope", [])
-          };
-
-          /* Validate the user scopes */
-          this.validateScope(auth, scope, validation).then(resolve).catch(reject);
-        })
-        .catch((err: AxiosError) => {
-          /* Reject the request with the same error from server */
-          reject({
-            boError: {
-              value: Objects.get(
-                err,
-                "response.data.error",
-                AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.value
-              ),
-              str: Objects.get(
-                err,
-                "response.data.description",
-                AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.str
+          /* Check if the user scope must be validated */
+          if (
+            scope &&
+            ((typeof scope === "string" && scope.length > 0) ||
+              (Array.isArray(scope) && scope.length > 0))
+          ) {
+            /* Validate the token against the auth service */
+            axios
+              .post(
+                `${this._authService}/v1/oauth/authenticate`,
+                {},
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                }
               )
-            },
-            boStatus: Objects.get(err, "response.status", HTTP_STATUS.HTTP_4XX_FORBIDDEN),
-            boData: Objects.get(err, "response.data.data")
-          });
-        });
+              .then((response: AxiosResponse) => {
+                const data = Objects.get(response, "data");
+
+                if (!data) {
+                  return reject({ boError: AUTH_ERRORS.INVALID_SERVER_RESPONSE });
+                }
+
+                /* Validate the user scopes */
+                user.scope = Objects.get(data, "scope", []);
+                this.validateScope(user, scope, validation).then(resolve).catch(reject);
+              })
+              .catch((err: AxiosError) => {
+                /* Reject the request with the same error from server */
+                reject({
+                  boError: {
+                    value: Objects.get(
+                      err,
+                      "response.data.error",
+                      AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.value
+                    ),
+                    str: Objects.get(
+                      err,
+                      "response.data.description",
+                      AUTH_ERRORS.UNKNOWN_AUTH_SERVER_ERROR.str
+                    )
+                  },
+                  boStatus: Objects.get(err, "response.status", HTTP_STATUS.HTTP_4XX_FORBIDDEN),
+                  boData: Objects.get(err, "response.data.data")
+                });
+              });
+          } else {
+            resolve(user);
+          }
+        })
+        .catch(reject);
     });
   }
 
@@ -154,35 +214,35 @@ class Authentication {
    * @param scope  Scope to be validated
    */
   public validateScope(
-    auth: IAuthenticationResponse,
+    user: IAuthPayload,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
-  ): Promise<IAuthenticationResponse> {
-    return new Promise<IAuthenticationResponse>((resolve, reject) => {
+  ): Promise<IAuthPayload> {
+    return new Promise<IAuthPayload>((resolve, reject) => {
       /* Validate required scopes */
       if (typeof scope === "string") {
-        if (auth.scope.indexOf(scope) < 0) {
+        if (user.scope.indexOf(scope) < 0) {
           return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
         }
       } else if (Array.isArray(scope)) {
         switch (validation) {
           case SCOPE_VALIDATION.NOT:
             /* User must not hold any of the scopes */
-            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length > 0) {
+            if (scope.filter((value) => user.scope.indexOf(value) >= 0).length > 0) {
               return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
             }
             break;
 
           case SCOPE_VALIDATION.OR:
             /* User must hold any of the scopes */
-            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length === 0) {
+            if (scope.filter((value) => user.scope.indexOf(value) >= 0).length === 0) {
               return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
             }
             break;
 
           default:
             /* User must holds all the scopes */
-            if (scope.filter((value) => auth.scope.indexOf(value) >= 0).length !== scope.length) {
+            if (scope.filter((value) => user.scope.indexOf(value) >= 0).length !== scope.length) {
               return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
             }
         }
@@ -190,7 +250,7 @@ class Authentication {
         return reject({ boError: AUTH_ERRORS.INVALID_SCOPE });
       }
 
-      resolve(auth);
+      resolve(user);
     });
   }
 
@@ -200,6 +260,7 @@ class Authentication {
    * @params scope  Scope to be validated for the given user or application
    */
   middleware(
+    userType?: number,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
   ): (req: Request, res: Response, next: NextFunction) => void {
@@ -228,8 +289,8 @@ class Authentication {
       }
 
       /* Authenticate the current request */
-      this.authenticate(header[1], scope, validation)
-        .then((auth: IAuthenticationResponse) => {
+      this.authenticate(header[1], userType, scope, validation)
+        .then((auth: IAuthPayload) => {
           const reqTmp: any = req;
           res.locals["auth"] = auth;
           reqTmp["user"] = auth;
