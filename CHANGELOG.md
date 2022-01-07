@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [2.1.3] - 2022-01-04
+
+- Add support for JWT controllers
+- Add predefined constants
+
+## [2.1.1] - 2022-01-04
+
+- Fix data export
+
 ## [2.1.0] - 2022-01-03
 
 - Update package dependencies
