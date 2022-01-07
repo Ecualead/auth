@@ -12,17 +12,14 @@ import { HTTP_STATUS, Objects } from "@ecualead/server";
 import { Request, Response, NextFunction } from "express";
 import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 import { AUTH_ERRORS } from "../constants/errors.enum";
-import { IAuthPayload } from "../models/data.types";
+import { IUserDataDecoded } from "../models/data.types";
 import { SCOPE_VALIDATION } from "../constants/scope.enum";
-import jwt from "jsonwebtoken";
+import { JWTCtrl } from "../controllers/jwt.controller";
 
-class Authentication {
+export class Authentication {
   private static _instance: Authentication;
   private _authService: string;
   private _token: string;
-  private _project: string;
-  private _audience: string;
-  private _validationKey: string;
 
   /**
    * Private constructor to allow singleton instance
@@ -44,17 +41,8 @@ class Authentication {
    *
    * @param authService  Auth service url to use
    */
-  public setup(
-    authService: string,
-    project: string,
-    audience: string,
-    validationKey: string,
-    useInterceptor?: boolean
-  ) {
+  public setup(authService: string, useInterceptor?: boolean) {
     this._authService = authService;
-    this._project = project;
-    this._audience = audience;
-    this._validationKey = validationKey;
 
     if (!useInterceptor) {
       return;
@@ -85,42 +73,22 @@ class Authentication {
     });
   }
 
-  /**
-   * Validate the user access token
-   */
-  validateJWT(token: string): Promise<IAuthPayload> {
-    return new Promise<IAuthPayload>((resolve, reject) => {
-      if (!this._validationKey || !this._project || !this._audience) {
-        return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
-      }
-
-      try {
-        /* Validate the JWT token with the public key */
-        const verifyOptions: jwt.VerifyOptions = {
-          algorithms: ["RS256"]
-        };
-        const decoded: any = jwt.verify(token, this._validationKey, verifyOptions);
-
-        /* Check if the decoded token is valid */
-        if (
-          decoded["project"] !== this._project ||
-          decoded["iss"] !== this._project ||
-          decoded["aud"] !== this._audience ||
-          (decoded["ut"] === 1 && decoded["sub"] !== decoded["email"]) ||
-          (decoded["ut"] === 2 && decoded["sub"] !== decoded["app"])
-        ) {
-          return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
+  private _getHeader(req: Request): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      /* Get authorization header token */
+      let header: string[] = req.headers.authorization ? req.headers.authorization.split(" ") : [];
+      if (!header || header.length !== 2) {
+        /* If the header is not set then try to get token from query parameters */
+        const token = Objects.get(req, "query.bt");
+        if (!token) {
+          return reject({ boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED });
         }
 
-        /* Check if the token is expired */
-        if (decoded["exp"] < Date.now() / 1000) {
-          return reject({ boError: AUTH_ERRORS.EXPIRED_TOKEN });
-        }
-
-        resolve(decoded as IAuthPayload);
-      } catch (err) {
-        reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
+        /* Set the query token */
+        header = ["Bearer", token];
       }
+
+      resolve(header[1]);
     });
   }
 
@@ -135,8 +103,8 @@ class Authentication {
     userType?: number,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
-  ): Promise<IAuthPayload> {
-    return new Promise<IAuthPayload>((resolve, reject) => {
+  ): Promise<IUserDataDecoded> {
+    return new Promise<IUserDataDecoded>((resolve, reject) => {
       if (!this._authService || this._authService.length <= 0) {
         return reject({ boError: AUTH_ERRORS.INVALID_AUTH_SERVER });
       }
@@ -145,8 +113,8 @@ class Authentication {
         return reject({ boError: AUTH_ERRORS.INVALID_TOKEN });
       }
 
-      this.validateJWT(token)
-        .then((user: IAuthPayload) => {
+      JWTCtrl.decode(token)
+        .then((user: IUserDataDecoded) => {
           /* Check if the user type is valid */
           if (userType && user.type !== userType) {
             return reject({ boError: AUTH_ERRORS.INVALID_USER_TYPE });
@@ -161,7 +129,7 @@ class Authentication {
             /* Validate the token against the auth service */
             axios
               .post(
-                `${this._authService}/v1/oauth/authenticate`,
+                `${this._authService}/authenticate`,
                 {},
                 {
                   headers: {
@@ -214,11 +182,11 @@ class Authentication {
    * @param scope  Scope to be validated
    */
   public validateScope(
-    user: IAuthPayload,
+    user: IUserDataDecoded,
     scope?: string | string[],
     validation?: SCOPE_VALIDATION
-  ): Promise<IAuthPayload> {
-    return new Promise<IAuthPayload>((resolve, reject) => {
+  ): Promise<IUserDataDecoded> {
+    return new Promise<IUserDataDecoded>((resolve, reject) => {
       /* Validate required scopes */
       if (typeof scope === "string") {
         if (user.scope.indexOf(scope) < 0) {
@@ -265,19 +233,6 @@ class Authentication {
     validation?: SCOPE_VALIDATION
   ): (req: Request, res: Response, next: NextFunction) => void {
     return (req: Request, res: Response, next: NextFunction) => {
-      /* Get authorization header token */
-      let header: string[] = req.headers.authorization ? req.headers.authorization.split(" ") : [];
-      if (!header || header.length !== 2) {
-        /* If the header is not set then try to get token from query parameters */
-        const token = Objects.get(req, "query.bt");
-        if (!token) {
-          return next({ boError: AUTH_ERRORS.AUTHENTICATION_REQUIRED });
-        }
-
-        /* Set the query token */
-        header = ["Bearer", token];
-      }
-
       /* Check if the request was authenticated previously */
       if (res.locals["auth"]) {
         this.validateScope(res.locals["auth"], scope, validation)
@@ -288,13 +243,57 @@ class Authentication {
         return;
       }
 
-      /* Authenticate the current request */
-      this.authenticate(header[1], userType, scope, validation)
-        .then((auth: IAuthPayload) => {
-          const reqTmp: any = req;
-          res.locals["auth"] = auth;
-          reqTmp["user"] = auth;
-          next();
+      this._getHeader(req)
+        .then((token: string) => {
+          /* Authenticate the current request */
+          this.authenticate(token, userType, scope, validation)
+            .then((auth: IUserDataDecoded) => {
+              const reqTmp: any = req;
+              res.locals["auth"] = auth;
+              reqTmp["user"] = auth;
+              next();
+            })
+            .catch(next);
+        })
+        .catch(next);
+    };
+  }
+
+  /**
+   * Express middleware to authenticate an user
+   */
+  checkUser(userType?: number): (req: Request, res: Response, next: NextFunction) => void {
+    return (req: Request, res: Response, next: NextFunction) => {
+      this._getHeader(req)
+        .then((token: string) => {
+          JWTCtrl.decode(token)
+            .then((decoded: IUserDataDecoded) => {
+              if (decoded.sub === decoded.app || (userType && decoded.type !== userType)) {
+                return next({ boError: AUTH_ERRORS.INVALID_USER });
+              }
+              next();
+            })
+            .catch(next);
+        })
+        .catch(next);
+    };
+  }
+
+  /**
+   * Express middleware to authenticate an application
+   */
+  checkApp(): (req: Request, res: Response, next: NextFunction) => void {
+    return (req: Request, res: Response, next: NextFunction) => {
+      this._getHeader(req)
+        .then((token: string) => {
+          JWTCtrl.decode(token)
+            .then((decoded: IUserDataDecoded) => {
+              if (decoded.sub !== decoded.app) {
+                return next({ boError: AUTH_ERRORS.INVALID_USER });
+              }
+              next();
+            })
+            .catch(next);
         })
         .catch(next);
     };
@@ -312,8 +311,6 @@ class Authentication {
       if (
         !this._authService ||
         this._authService.length <= 0 ||
-        !this._project ||
-        this._project.length <= 0 ||
         !id ||
         !secret ||
         id.length === 0 ||
@@ -328,7 +325,7 @@ class Authentication {
 
       /* Perform the authentication request against the IAM */
       axios
-        .post(`${this._authService}/v1/oauth/${this._project}/login`, body, {
+        .post(`${this._authService}/token`, body, {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
