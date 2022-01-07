@@ -11,24 +11,38 @@
 
 /* Export controllers */
 export { AuthActionsCtrl } from "./controllers/auth.actions.controller";
+export { JWT, JWTCtrl } from "./controllers/jwt.controller";
 
 /* Export api middlewares */
-export { AuthenticationCtrl } from "./middlewares/authentication.middleware";
+export { Authentication, AuthenticationCtrl } from "./middlewares/authentication.middleware";
 
 /* Export constants */
 export { AUTH_ERRORS } from "./constants/errors.enum";
 export { SCOPE_VALIDATION } from "./constants/scope.enum";
+export { EXTERNAL_AUTH_TYPE, ACCOUNT_STATUS } from "./constants/oauth2.enum";
+export {
+  OAUTH2_TOKEN_TYPE,
+  EMAIL_TOKEN_TYPE,
+  LIFETIME_TYPE,
+  VALIDATION_TOKEN_STATUS
+} from "./constants/token.enum";
 
 /* Export models */
 export {
-  IAuthPayload,
+  IUserData,
+  IUserDataDecoded,
   IRegisterData,
   ILoginData,
   IProfileUpdateData,
   IIdResponse,
   ILoginResponse,
-  IProfileResponse
+  IProfileResponse,
+  IConfirmData,
+  IEmailResponse,
+  IPasswordData,
+  IRecoverData,
+  IValidationResponse
 } from "./models/data.types";
 
 /* Export utility classes */
-export * from "./utils/credential.util";
+export { Credential } from "./utils/credential.util";
