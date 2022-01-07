@@ -9,23 +9,24 @@
  * permission of the author.
  */
 
-export interface IAuthPayload {
-  prj: string;
-  app: string;
+ export interface IUserData {
   uid: string;
-  email: string;
-  name: string;
-  lname1: string;
-  lname2: string;
-  type: number;
+  name?: string;
+  lname1?: string;
+  lname2?: string;
+  email?: string;
+  type?: number;
+  app: string;
+}
+
+export interface IUserDataDecoded extends IUserData {
   iat: number;
   exp: number;
   aud: string;
   iss: string;
   sub: string;
-  scope?: string[];
+  scope?: string | string[];
 }
-
 export interface IRegisterData {
   email: string;
   password: string;
