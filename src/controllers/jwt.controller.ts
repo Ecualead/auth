@@ -14,25 +14,7 @@ import { generateKeyPairSync } from "crypto";
 import { HTTP_STATUS, Logger } from "@ecualead/server";
 import { AUTH_ERRORS } from "../constants/errors.enum";
 import { OAUTH2_TOKEN_TYPE } from "../constants/token.enum";
-
-export interface IUserData {
-  uid: string;
-  name?: string;
-  lname1?: string;
-  lname2?: string;
-  email?: string;
-  type?: number;
-  app: string;
-}
-
-export interface IUserDataDecoded extends IUserData {
-  iat: number;
-  exp: number;
-  aud: string;
-  iss: string;
-  sub: string;
-  ut: OAUTH2_TOKEN_TYPE;
-}
+import { IUserData, IUserDataDecoded } from "../models/data.types";
 
 export class JWT {
   private static _instance: JWT;

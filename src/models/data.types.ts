@@ -8,8 +8,9 @@
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
+import { OAUTH2_TOKEN_TYPE } from "../constants/token.enum";
 
- export interface IUserData {
+export interface IUserData {
   uid: string;
   name?: string;
   lname1?: string;
@@ -17,6 +18,7 @@
   email?: string;
   type?: number;
   app: string;
+  ut: OAUTH2_TOKEN_TYPE;
 }
 
 export interface IUserDataDecoded extends IUserData {
@@ -27,6 +29,7 @@ export interface IUserDataDecoded extends IUserData {
   sub: string;
   scope?: string | string[];
 }
+
 export interface IRegisterData {
   email: string;
   password: string;
