@@ -1,6 +1,14 @@
 # CHANGELOG
 
-## [2.1.3] - 2022-01-04
+## [2.1.5] - 2022-01-07
+
+- Remove duplicated interfaces
+
+## [2.1.4] - 2022-01-07
+
+- Fix JWT input data
+
+## [2.1.3] - 2022-01-07
 
 - Add support for JWT controllers
 - Add predefined constants
