@@ -34,14 +34,9 @@ export class JWT {
   /**
    * Initialize JWT controller
    */
-  public static setup(issuer: string, audience: string) {
-    if (!JWT._instance) {
-      JWT._instance = new JWT();
-      JWT._instance._issuer = issuer;
-      JWT._instance._audience = audience;
-    } else {
-      throw new Error("JWT already initialized");
-    }
+  public setup(issuer: string, audience: string) {
+    this._issuer = issuer;
+    this._audience = audience;
   }
 
   /**
@@ -49,7 +44,7 @@ export class JWT {
    */
   public static get shared(): JWT {
     if (!JWT._instance) {
-      throw new Error("JWT not initialized");
+      JWT._instance = new JWT();
     }
     return JWT._instance;
   }
