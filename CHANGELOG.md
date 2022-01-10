@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.7] - 2022-01-09
+
+- Return JWT decoded token in middlewares
+
 ## [2.1.5] - 2022-01-07
 
 - Remove duplicated interfaces
