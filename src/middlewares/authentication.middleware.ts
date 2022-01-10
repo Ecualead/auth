@@ -249,7 +249,7 @@ export class Authentication {
           this.authenticate(token, userType, scope, validation)
             .then((auth: IUserDataDecoded) => {
               const reqTmp: any = req;
-              res.locals["auth"] = auth;
+              res.locals["jwt"] = auth;
               reqTmp["user"] = auth;
               next();
             })
@@ -271,6 +271,7 @@ export class Authentication {
               if (decoded.sub === decoded.app || (userType && decoded.type !== userType)) {
                 return next({ boError: AUTH_ERRORS.INVALID_USER });
               }
+              res.locals["jwt"] = decoded;
               next();
             })
             .catch(next);
@@ -291,6 +292,7 @@ export class Authentication {
               if (decoded.sub !== decoded.app) {
                 return next({ boError: AUTH_ERRORS.INVALID_USER });
               }
+              res.locals["jwt"] = decoded;
               next();
             })
             .catch(next);
