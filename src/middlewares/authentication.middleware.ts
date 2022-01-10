@@ -248,9 +248,8 @@ export class Authentication {
           /* Authenticate the current request */
           this.authenticate(token, userType, scope, validation)
             .then((auth: IUserDataDecoded) => {
-              const reqTmp: any = req;
               res.locals["jwt"] = auth;
-              reqTmp["user"] = auth;
+              (req as any).user = res.locals["jwt"];
               next();
             })
             .catch(next);
@@ -272,6 +271,7 @@ export class Authentication {
                 return next({ boError: AUTH_ERRORS.INVALID_USER });
               }
               res.locals["jwt"] = decoded;
+              (req as any).user = decoded;
               next();
             })
             .catch(next);
@@ -293,6 +293,7 @@ export class Authentication {
                 return next({ boError: AUTH_ERRORS.INVALID_USER });
               }
               res.locals["jwt"] = decoded;
+              (req as any).user = decoded;
               next();
             })
             .catch(next);
