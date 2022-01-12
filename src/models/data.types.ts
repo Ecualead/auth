@@ -1,21 +1,33 @@
 /**
- * Copyright (C) 2020 - 2021 IKOA Business Opportunity
+ * Copyright (C) 2020 - 2022 ECUALEAD
  *
  * All Rights Reserved
- * Author: Reinier Millo Sánchez <millo@ikoabo.com>
+ * Author: Reinier Millo Sánchez <rmillo@ecualead.com>
  *
- * This file is part of the IKOA Business Oportunity Auth Package
+ * This file is part of the Developer Auth Package
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
+import { OAUTH2_TOKEN_TYPE } from "../constants/token.enum";
 
-export interface IAuthenticationResponse {
-  user: string;
-  username: string;
-  application: string;
-  project: string;
-  domain: string;
-  scope: string[];
+export interface IUserData {
+  uid: string;
+  name?: string;
+  lname1?: string;
+  lname2?: string;
+  email?: string;
+  type?: number;
+  app: string;
+  ut: OAUTH2_TOKEN_TYPE;
+}
+
+export interface IUserDataDecoded extends IUserData {
+  iat: number;
+  exp: number;
+  aud: string;
+  iss: string;
+  sub: string;
+  scope?: string | string[];
 }
 
 export interface IRegisterData {

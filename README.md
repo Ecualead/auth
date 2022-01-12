@@ -1,17 +1,17 @@
-# IKOABO Business Opportunity Auth API
+# Developer Auth API
 
-Utility functions for IKOA Business Opportunity Identity Management Service integration. This library provide the middleware to handle security into backend API validating requests against the service.
+Utility functions for Developer Identity Management Service integration. This library provide the middleware to handle security into backend API validating requests against the service.
 
 The package is developed with the aim of being used in conjunction with the rest of the packages of the platform, but it don't restrict use it as standalone package.
 
-[![Version npm](https://img.shields.io/npm/v/@ikoabo/auth.svg?style=flat-square)](https://www.npmjs.com/package/@ikoabo/auth)[![npm Downloads](https://img.shields.io/npm/dm/@ikoabo/auth.svg?style=flat-square)](https://npmcharts.com/compare/@ikoabo/auth?minimal=true)[![Build Status](https://gitlab.com/ikoabo/packages/auth/badges/master/pipeline.svg)](https://gitlab.com/ikoabo/packages/auth)[![coverage testing report](https://gitlab.com/ikoabo/packages/auth/badges/master/coverage.svg)](https://gitlab.com/ikoabo/packages/auth/-/commits/master)
+[![Version npm](https://img.shields.io/npm/v/@ecualead/auth.svg?style=flat-square)](https://www.npmjs.com/package/@ecualead/auth)[![npm Downloads](https://img.shields.io/npm/dm/@ecualead/auth.svg?style=flat-square)](https://npmcharts.com/compare/@ecualead/auth?minimal=true)[![Build Status](https://gitlab.com/ecualead/auth/badges/master/pipeline.svg)](https://gitlab.com/ecualead/auth)[![coverage testing report](https://gitlab.com/ecualead/auth/badges/master/coverage.svg)](https://gitlab.com/ecualead/auth/-/commits/master)
 
-[![NPM](https://nodei.co/npm/@ikoabo/auth.png?downloads=true&downloadRank=true)](https://nodei.co/npm/@ikoabo/auth/)
+[![NPM](https://nodei.co/npm/@ecualead/auth.png?downloads=true&downloadRank=true)](https://nodei.co/npm/@ecualead/auth/)
 
 ## Installation
 
 ```bash
-npm install @ikoabo/auth
+npm install @ecualead/auth
 ```
 
 ## Initialize the middleware
@@ -19,7 +19,7 @@ npm install @ikoabo/auth
 The authententication middleware must be initialized with the address of the Identity Management Service
 
 ```js
-import { AuthenticationCtrl } from "@ikoabo/auth";
+import { AuthenticationCtrl } from "@ecualead/auth";
 AuthenticationCtrl.setup("https://myserver.com", true);
 ```
 
@@ -34,8 +34,8 @@ When the API Backend is registered into the Identity Managemen Service a credent
 Backend authentication can be easily integrated with the cluster server initialization:
 
 ```js
-import { ClusterServer } from "@ikoabo/server";
-import { AuthenticationCtrl } from "@ikoabo/auth";
+import { ClusterServer } from "@ecualead/server";
+import { AuthenticationCtrl } from "@ecualead/auth";
 
 /**
  * Authenticate agains auth service
@@ -75,7 +75,7 @@ To authenticate the recived request we must use the middleware inside the expres
 
 ```js
 import { Router, Request, Response, NextFunction } from "express";
-import { AuthenticationCtrl, SCOPE_VALIDATION } from "@ikoabo/auth";
+import { AuthenticationCtrl, SCOPE_VALIDATION } from "@ecualead/auth";
 const router = Router();
 
 router.get(
@@ -130,7 +130,7 @@ If the `get` request can't sent the authorization token in the header request, t
 
 ```js
 import { Router, Request, Response, NextFunction } from "express";
-import { AuthenticationCtrl, SCOPE_VALIDATION } from "@ikoabo/auth";
+import { AuthenticationCtrl, SCOPE_VALIDATION } from "@ecualead/auth";
 const router = Router();
 
 router.get(

@@ -1,14 +1,14 @@
 /**
- * Copyright (C) 2020 - 2021 IKOA Business Opportunity
+ * Copyright (C) 2020 - 2022 ECUALEAD
  *
  * All Rights Reserved
- * Author: Reinier Millo Sánchez <millo@ikoabo.com>
+ * Author: Reinier Millo Sánchez <rmillo@ecualead.com>
  *
- * This file is part of the IKOA Business Oportunity Auth Package
+ * This file is part of the Developer Auth Package
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
-import { Objects } from "@ikoabo/server";
+import { Objects } from "@ecualead/server";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { AUTH_ERRORS } from "../constants/errors.enum";
 import {
@@ -28,7 +28,6 @@ import {
 class AuthActions {
   private static _instance: AuthActions;
   private _service: string;
-  private _project: string;
 
   private constructor() {}
 
@@ -46,12 +45,10 @@ class AuthActions {
    * Set the auth service url
    *
    * @param service
-   * @param project
    *
    */
-  public setup(service: string, project: string) {
+  public setup(service: string) {
     this._service = service;
-    this._project = project;
   }
 
   /**
@@ -91,7 +88,7 @@ class AuthActions {
   public register(credential: string, payload: IRegisterData): Promise<IIdResponse> {
     return new Promise<IIdResponse>((resolve, reject) => {
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/register`, payload, {
+        .post(`${this._service}/v1/oauth/register`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -118,7 +115,7 @@ class AuthActions {
       body.append("password", payload.password);
 
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/login`, body, {
+        .post(`${this._service}/v1/oauth/login`, body, {
           headers: {
             Authorization: `Basic ${credential}`,
             "Content-type": "application/x-www-form-urlencoded"
@@ -146,7 +143,7 @@ class AuthActions {
       body.append("password", payload.password);
 
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/resend`, body, {
+        .post(`${this._service}/v1/oauth/resend`, body, {
           headers: {
             Authorization: `Basic ${credential}`,
             "Content-type": "application/x-www-form-urlencoded"
@@ -169,7 +166,7 @@ class AuthActions {
   public confirm(credential: string, payload: IConfirmData): Promise<IEmailResponse> {
     return new Promise<IEmailResponse>((resolve, reject) => {
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/confirm`, payload, {
+        .post(`${this._service}/v1/oauth/confirm`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -191,7 +188,7 @@ class AuthActions {
   public passwd(credential: string, payload: IPasswordData): Promise<IEmailResponse> {
     return new Promise<IEmailResponse>((resolve, reject) => {
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/password`, payload, {
+        .post(`${this._service}/v1/oauth/password`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -213,7 +210,7 @@ class AuthActions {
   public recoverRequest(credential: string, payload: IEmailResponse): Promise<IEmailResponse> {
     return new Promise<IEmailResponse>((resolve, reject) => {
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/recover/request`, payload, {
+        .post(`${this._service}/v1/oauth/recover/request`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -235,7 +232,7 @@ class AuthActions {
   public recoverValidate(credential: string, payload: IConfirmData): Promise<IEmailResponse> {
     return new Promise<IEmailResponse>((resolve, reject) => {
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/recover/validate`, payload, {
+        .post(`${this._service}/v1/oauth/recover/validate`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -257,7 +254,7 @@ class AuthActions {
   public recoverStore(credential: string, payload: IRecoverData): Promise<IEmailResponse> {
     return new Promise<IEmailResponse>((resolve, reject) => {
       axios
-        .post(`${this._service}/v1/oauth/${this._project}/recover/store`, payload, {
+        .post(`${this._service}/v1/oauth/recover/store`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -303,7 +300,7 @@ class AuthActions {
     return new Promise<void>((resolve, reject) => {
       axios
         .post(
-          `${this._service}/v1/oauth/${this._project}/logout`,
+          `${this._service}/v1/oauth/logout`,
           {},
           {
             headers: {
@@ -327,7 +324,7 @@ class AuthActions {
   public profile(credential: string): Promise<IProfileResponse> {
     return new Promise<IProfileResponse>((resolve, reject) => {
       axios
-        .get(`${this._service}/v1/oauth/${this._project}/profile`, {
+        .get(`${this._service}/v1/oauth/profile`, {
           headers: {
             Authorization: `Bearer ${credential}`
           }
@@ -349,7 +346,7 @@ class AuthActions {
   public updateProfile(credential: string, payload: IProfileUpdateData): Promise<IProfileResponse> {
     return new Promise<IProfileResponse>((resolve, reject) => {
       axios
-        .put(`${this._service}/v1/oauth/${this._project}/profile`, payload, {
+        .put(`${this._service}/v1/oauth/profile`, payload, {
           headers: {
             Authorization: `Bearer ${credential}`
           }

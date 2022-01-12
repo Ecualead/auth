@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## [2.1.9] - 2022-01-11
+
+- Update authentication middleware
+- Add support for service internal security
+
+## [2.1.7] - 2022-01-09
+
+- Return JWT decoded token in middlewares
+
+## [2.1.5] - 2022-01-07
+
+- Remove duplicated interfaces
+
+## [2.1.4] - 2022-01-07
+
+- Fix JWT input data
+
+## [2.1.3] - 2022-01-07
+
+- Add support for JWT controllers
+- Add predefined constants
+
+## [2.1.1] - 2022-01-04
+
+- Fix data export
+
+## [2.1.0] - 2022-01-03
+
+- Update package dependencies
+- Allow to validate JWT
+
 ## [2.0.3] - 2021-10-13
 
 - Fix error responses: Add `data` field return to error

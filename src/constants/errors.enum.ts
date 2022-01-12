@@ -1,19 +1,19 @@
 /**
- * Copyright (C) 2020 - 2021 IKOA Business Opportunity
+ * Copyright (C) 2020 - 2022 ECUALEAD
  *
  * All Rights Reserved
- * Author: Reinier Millo Sánchez <millo@ikoabo.com>
+ * Author: Reinier Millo Sánchez <rmillo@ecualead.com>
  *
- * This file is part of the IKOA Business Oportunity Auth Package
+ * This file is part of the Developer Auth Package
  * It can't be copied and/or distributed without the express
  * permission of the author.
  */
-import { HTTP_STATUS } from "@ikoabo/server";
+import { HTTP_STATUS, IServiceErrors } from "@ecualead/server";
 
 /**
  * Predefined auth errors
  */
-export const AUTH_ERRORS = {
+export const AUTH_ERRORS: IServiceErrors = {
   INVALID_AUTH_SERVER: {
     value: 1001,
     str: "invalid-auth-server",
@@ -178,5 +178,10 @@ export const AUTH_ERRORS = {
     value: 1033,
     str: "cant-register-another-social",
     status: HTTP_STATUS.HTTP_4XX_BAD_REQUEST
+  },
+  INVALID_USER_TYPE: {
+    value: 1030,
+    str: "invalid-user-type",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   }
 };
