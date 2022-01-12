@@ -183,5 +183,35 @@ export const AUTH_ERRORS: IServiceErrors = {
     value: 1030,
     str: "invalid-user-type",
     status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+  },
+  FILE_IS_NOT_IMAGE: {
+    value: 2001,
+    str: "file-is-not-image",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
+  },
+  INVALID_FILE_PREVIEW: {
+    value: 2002,
+    str: "invalid-file-preview",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+  },
+  INVALID_IMAGE_RENDER: {
+    value: 2003,
+    str: "invalid-image-render",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+  },
+  INVALID_IMAGE_URL: {
+    value: 2004,
+    str: "invalid-image-url",
+    status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
+  },
+  INVALID_FILE_MIMETYPE: {
+    value: 2005,
+    str: "invalid-file-mimetype",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
+  },
+  INVALID_FILE_METADATA: {
+    value: 2006,
+    str: "invalid-file-metadata",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
   }
 };
