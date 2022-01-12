@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.10] - 2022-01-11
+
+- Update errors definition
+
 ## [2.1.9] - 2022-01-11
 
 - Update authentication middleware
