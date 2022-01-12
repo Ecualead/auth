@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.1.9] - 2022-01-11
+
+- Update authentication middleware
+- Add support for service internal security
+
 ## [2.1.7] - 2022-01-09
 
 - Return JWT decoded token in middlewares
