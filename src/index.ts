@@ -12,6 +12,7 @@
 /* Export controllers */
 export { AuthActionsCtrl } from "./controllers/auth.actions.controller";
 export { JWT, JWTCtrl } from "./controllers/jwt.controller";
+export { SecurityCtrl } from "./controllers/security.controller";
 
 /* Export api middlewares */
 export { Authentication, AuthenticationCtrl } from "./middlewares/authentication.middleware";
@@ -43,6 +44,7 @@ export {
   IRecoverData,
   IValidationResponse
 } from "./models/data.types";
+export { Security, SecurityDocument, SecurityModel } from "./models/security.model";
 
 /* Export utility classes */
 export { Credential } from "./utils/credential.util";
