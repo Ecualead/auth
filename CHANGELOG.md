@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.11] - 2022-01-12
+
+- Add function to set initial token
+
 ## [2.1.10] - 2022-01-11
 
 - Update errors definition
