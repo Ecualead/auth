@@ -184,6 +184,11 @@ export const AUTH_ERRORS: IServiceErrors = {
     str: "invalid-user-type",
     status: HTTP_STATUS.HTTP_4XX_FORBIDDEN
   },
+  INVALID_RECAPTCHA: {
+    value: 1031,
+    str: "invalid-recaptcha",
+    status: HTTP_STATUS.HTTP_4XX_NOT_ACCEPTABLE
+  },
   FILE_IS_NOT_IMAGE: {
     value: 2001,
     str: "file-is-not-image",
