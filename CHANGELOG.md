@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [2.1.13] -2022-02-28
+
+- Fix GoogleReCaptcha validation
+- Validate recaptcha action
+
+## [2.1.12] - 2022-01-31
+
+- Initial GoogleReCaptcha v3 support
+
 ## [2.1.11] - 2022-01-12
 
 - Add function to set initial token
