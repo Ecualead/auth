@@ -20,7 +20,7 @@ export class ReCaptcha {
       if (process.env.NOT_RECAPTCHA === "1") {
         return next();
       }
-      
+
       const secret = process.env.RECAPTCHA_SECRET;
       const token = req.body["grt"] || req.query["grt"] || req.headers["grt"];
       if (!token) {
