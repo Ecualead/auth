@@ -430,6 +430,16 @@ export class Authentication {
   }
 
   /**
+   * Authenticate the service application
+   *
+   * @param id  Application id of the service
+   * @param secret  Application secret of the service
+   */
+   public setToken(token: string) {
+    this._token = token;
+  }
+
+  /**
    * Force request to be authenticated. If the access token is not
    * set in header, then try to get from query parameters
    *

@@ -16,6 +16,7 @@ export { SecurityCtrl } from "./controllers/security.controller";
 
 /* Export api middlewares */
 export { Authentication, AuthenticationCtrl } from "./middlewares/authentication.middleware";
+export { ReCaptcha } from "./middlewares/recaptcha.middleware";
 
 /* Export constants */
 export { AUTH_ERRORS } from "./constants/errors.enum";
