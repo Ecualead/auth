@@ -4,7 +4,7 @@ Utility functions for Developer Identity Management Service integration. This li
 
 The package is developed with the aim of being used in conjunction with the rest of the packages of the platform, but it don't restrict use it as standalone package.
 
-[![Version npm](https://img.shields.io/npm/v/@ecualead/auth.svg?style=flat-square)](https://www.npmjs.com/package/@ecualead/auth)[![npm Downloads](https://img.shields.io/npm/dm/@ecualead/auth.svg?style=flat-square)](https://npmcharts.com/compare/@ecualead/auth?minimal=true)[![Build Status](https://gitlab.com/ecualead/auth/badges/master/pipeline.svg)](https://gitlab.com/ecualead/auth)[![coverage testing report](https://gitlab.com/ecualead/auth/badges/master/coverage.svg)](https://gitlab.com/ecualead/auth/-/commits/master)
+[![Version npm](https://img.shields.io/npm/v/@ecualead/auth.svg?style=flat-square)](https://www.npmjs.com/package/@ecualead/auth)[![npm Downloads](https://img.shields.io/npm/dm/@ecualead/auth.svg?style=flat-square)](https://npmcharts.com/compare/@ecualead/auth?minimal=true)
 
 [![NPM](https://nodei.co/npm/@ecualead/auth.png?downloads=true&downloadRank=true)](https://nodei.co/npm/@ecualead/auth/)
 
