@@ -1,6 +1,6 @@
 {
   "name": "@ecualead/auth",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Developer Auth API",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -44,31 +44,31 @@
   },
   "homepage": "https://github.com/Ecualead/auth/blob/main/README.md",
   "devDependencies": {
-    "@types/chai": "^4.3.3",
-    "@types/express": "^4.17.13",
+    "@types/chai": "^4.3.4",
+    "@types/express": "^4.17.14",
     "@types/jsonwebtoken": "^8.5.9",
-    "@types/mocha": "^9.1.1",
-    "@typescript-eslint/eslint-plugin": "^5.36.2",
-    "@typescript-eslint/parser": "^5.36.2",
-    "chai": "^4.3.6",
-    "eslint": "^8.23.1",
+    "@types/mocha": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
+    "chai": "^4.3.7",
+    "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-import-resolver-typescript": "^3.5.1",
+    "eslint-import-resolver-typescript": "^3.5.2",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
     "install-peers-cli": "^2.2.0",
-    "mocha": "^10.0.0",
+    "mocha": "^10.1.0",
     "nyc": "^15.1.0",
     "prettier": "^2.7.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.8.3"
+    "typescript": "^4.9.3"
   },
   "peerDependencies": {
     "@ecualead/server": "2.x",
     "@typegoose/typegoose": "9.x",
     "express": "4.x",
     "mongoose": "6.x",
-    "axios": "0.x"
+    "axios": "1.x"
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1"
